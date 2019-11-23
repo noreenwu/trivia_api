@@ -13,9 +13,8 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  logging.warning("hello")
-  categories = Category.query.all()
-  logging.warning("category", categories[2].type)
+  app.logger.info("hello")
+
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
@@ -38,6 +37,24 @@ def create_app(test_config=None):
   @app.route('/messages')
   def get_messages():
       return 'Hello, messages'
+
+  @app.route('/categories')
+  def get_categories():
+      categories = Category.query.all()
+      # logging.warning("category", categories[2].type)
+      str = ""
+      for i in categories:
+         str = str + ' ' + i.type
+      return str
+
+  @app.route('/questions')
+  def get_questions():
+      questions = Question.query.all()
+      questionStr = ""
+      for q in questions:
+         questionStr = questionStr + '<br>' + q.question
+
+      return questionStr
 
   '''
   @TODO: 
