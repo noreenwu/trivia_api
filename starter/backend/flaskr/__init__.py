@@ -41,20 +41,27 @@ def create_app(test_config=None):
   @app.route('/categories')
   def get_categories():
       categories = Category.query.all()
-      # logging.warning("category", categories[2].type)
+
       str = ""
-      for i in categories:
-         str = str + ' ' + i.type
+      i = 1
+      cat_obj = {}
+      for c in categories:
+         str = str + ' ' + c.type
+         cat_obj[i] = c.type
+         i = i+1
+      app.logger.info(cat_obj)
       return str
+
 
   @app.route('/questions')
   def get_questions():
       questions = Question.query.all()
       questionStr = ""
+      answerStr = ""
       for q in questions:
          questionStr = questionStr + '<br>' + q.question
-
-      return questionStr
+         answerStr = answerStr + '<br>' + q.answer
+      return questionStr + answerStr
 
   '''
   @TODO: 
