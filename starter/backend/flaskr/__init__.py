@@ -8,6 +8,9 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+# ------------------------------------------------------------------------------
+#  Retrieve the categories from the database and return them in an object format
+# ------------------------------------------------------------------------------
 def get_all_categories():
   categories = Category.query.all()
   i = 1
@@ -17,6 +20,9 @@ def get_all_categories():
     i = i+1
   return cat_obj
 
+# ------------------------------------------------------------------------------
+#  Given array of Question objects, return object, using index as key
+# ------------------------------------------------------------------------------
 def get_all_questions(questions):
   i = 1
   q_obj = {}
@@ -28,6 +34,36 @@ def get_all_questions(questions):
                 'category': q.category }
     i = i + 1    
   return q_obj  
+
+def get_questions_package(page, questions):
+  startIdx = (page-1) * QUESTIONS_PER_PAGE    
+  # app.logger.info("total questions %d",len(questions))
+
+  if startIdx > len(questions):
+    # app.logger.info("startIdx ")
+    # app.logger.info("questions length %d", len(questions))
+    return jsonify({0: 'empty'})   # actually return other info and only questions would be empty
+
+  else:
+    endIdx = (page * QUESTIONS_PER_PAGE)
+
+    endIdx = min(endIdx, len(questions))          
+    # app.logger.info("and the ending index is %d", endIdx)
+
+    thisPageQuestions = questions[startIdx:endIdx]
+    num_questions_this_page = len(thisPageQuestions)
+    # app.logger.info("thispagequestions is %d", num_questions_this_page)
+
+    q_obj = {}
+    q_obj = get_all_questions(thisPageQuestions)
+
+    qresults = {}
+    qresults['questions'] = q_obj
+    qresults['total_questions'] = len(questions)
+    qresults['categories'] = get_all_categories()
+    # app.logger.info("results for questions %d", len(qresults['questions']))
+    return jsonify(qresults)
+
 
 def create_app(test_config=None):
   # create and configure the app
@@ -84,73 +120,48 @@ def create_app(test_config=None):
   def get_questions_by_cat(id):
       page = request.args.get('page', 1, type=int)
 
-      startIdx = (page-1) * QUESTIONS_PER_PAGE    
+
       questions = Question.query.filter_by(category=id).all()
+      
+      return get_questions_package(page, questions)
+    #   startIdx = (page-1) * QUESTIONS_PER_PAGE    
+    #   app.logger.info("total questions %d",len(questions))
 
-      app.logger.info("total questions %d",len(questions))
+    #   if startIdx > len(questions):
+    #       app.logger.info("startIdx ")
+    #       app.logger.info("questions length %d", len(questions))
+    #       return jsonify({0: 'empty'})
 
-      if startIdx > len(questions):
-          app.logger.info("startIdx ")
-          app.logger.info("questions length %d", len(questions))
-          return jsonify({0: 'empty'})
+    #   else:
+    #       app.logger.info("getting questions startIdx %d", startIdx)
+    #       endIdx = (page * QUESTIONS_PER_PAGE)
 
-      else:
-          app.logger.info("getting questions startIdx %d", startIdx)
-          endIdx = (page * QUESTIONS_PER_PAGE)
+    #       endIdx = min(endIdx, len(questions))          
+    #       app.logger.info("and the ending index is %d", endIdx)
 
-          endIdx = min(endIdx, len(questions))          
-          app.logger.info("and the ending index is %d", endIdx)
-
-          thisPageQuestions = questions[startIdx:endIdx]
-          num_questions_this_page = len(thisPageQuestions)
-          app.logger.info("thispagequestions is %d", num_questions_this_page)
-          q_obj = {}
-          i = 1
-          for q in thisPageQuestions:
-              q_obj[i] = q.question
-              i = i + 1
-          results = {}              
-          results['questions'] = q_obj 
-          results['total_questions'] = num_questions_this_page
-          results['currentCategory'] = id
-          return jsonify(results)
+    #       thisPageQuestions = questions[startIdx:endIdx]
+    #       num_questions_this_page = len(thisPageQuestions)
+    #       app.logger.info("thispagequestions is %d", num_questions_this_page)
+    #       q_obj = {}
+    #       i = 1
+    #       for q in thisPageQuestions:
+    #           q_obj[i] = q.question
+    #           i = i + 1
+    #       results = {}              
+    #       results['questions'] = q_obj 
+    #       results['total_questions'] = num_questions_this_page
+    #       results['currentCategory'] = id
+    #       return jsonify(results)
 
 
   @app.route('/questions')
   def get_questions():
       page = request.args.get('page', 1, type=int)
 
-      startIdx = (page-1) * QUESTIONS_PER_PAGE    
       questions = Question.query.all()
 
-      app.logger.info("total questions %d",len(questions))
+      return get_questions_package(page, questions)
 
-      if startIdx > len(questions):
-          app.logger.info("startIdx ")
-          app.logger.info("questions length %d", len(questions))
-          return jsonify({0: 'empty'})
-
-      else:
-          app.logger.info("getting questions startIdx %d", startIdx)
-          endIdx = (page * QUESTIONS_PER_PAGE)
-
-          endIdx = min(endIdx, len(questions))          
-          app.logger.info("and the ending index is %d", endIdx)
-       
-
-          thisPageQuestions = questions[startIdx:endIdx]
-          num_questions_this_page = len(thisPageQuestions)
-          app.logger.info("thispagequestions is %d", num_questions_this_page)
- 
-          q_obj = {}
-          q_obj = get_all_questions(thisPageQuestions)
-
-          qresults = {}
-          qresults['questions'] = q_obj
-          qresults['total_questions'] = len(questions)
-          qresults['categories'] = get_all_categories()
-          app.logger.info("results for questions %d", len(qresults['questions']))
-          return jsonify(qresults)
           
 
   '''
