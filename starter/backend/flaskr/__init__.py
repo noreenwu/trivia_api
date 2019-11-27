@@ -74,6 +74,15 @@ def get_term(term):
   term_lower = '%' + term_lower + '%'
   return term_lower
 
+#  Format a Question
+
+def format_question(question):
+  return {'id': question.id,
+          'question': question.question,
+          'answer': question.answer,
+          'difficulty': question.difficulty,
+          'category': question.category }   
+         
 
 def create_app(test_config=None):
   # create and configure the app
@@ -225,24 +234,26 @@ def create_app(test_config=None):
   def get_quiz_question():
     # given category, previous questions, return a random remaining question from the category
   
-    data = request.get_json('anything')
+    data = request.get_json('previous_questions')       # something is required to get data but everything is returned
     previous_questions = data['previous_questions']
     quiz_category = data['quiz_category']
     app.logger.info("quiz_category was %s", quiz_category)
 
-    # query the category 
     questions = Question.query.filter(Question.category==quiz_category).filter(~Question.id.in_(previous_questions)).all()
 
-    # questions = questions.filter(~Question.id.in_([5])).all()
-    # return "length of questions returned was " + str(len(questions))
+    result = {}
+    if len(questions) == 0:
+        result['question'] = {}
+        return jsonify(result)
+
     if len(questions) > 1:
         rand_idx = random.randint(0, len(questions)-1)
-        return "would return question id " + str(questions[rand_idx].id)
+        result['question'] = format_question(questions[rand_idx])
+
+        return jsonify(result)
     else:
-        return "would return question id " + str(questions[0].id)
-    #     return questions[rand_idx].question
-    # else:
-    #     return questions[0].question
+        result['question'] = format_question(questions[0])
+        return jsonify(result)
 
   '''
   @TODO: 
