@@ -8,6 +8,7 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
 # ------------------------------------------------------------------------------
 #  Retrieve the categories from the database and return them in an object format
 # ------------------------------------------------------------------------------
@@ -85,6 +86,7 @@ def create_app(test_config=None):
   '''
 #   cors = CORS(app, resources={r"/questions/*": {"origins": "*"}})
   cors = CORS(app, resources={r"/*": {"origins": "*"}})
+#   cors = CORS(app)
 
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -105,7 +107,6 @@ def create_app(test_config=None):
       return 'Hello, messages'
 
   @app.route('/categories')
-#   @cross_origin
   def get_categories():
       categories = Category.query.all()
 
@@ -117,11 +118,8 @@ def create_app(test_config=None):
          cat_obj[i] = c.type
          i = i+1
       app.logger.info(cat_obj)
-      return jsonify(cat_obj)
-
-
-
-
+      categories = {'categories': cat_obj}
+      return jsonify(categories)
 
 
 
@@ -144,18 +142,18 @@ def create_app(test_config=None):
       return get_questions_package(page, questions)
 
           
-  @app.route('/questions/search', methods=['POST'])
+  @app.route('/search', methods=['OPTIONS','POST'])
   def search_questions():
-      page = request.args.get('page', 1, type=int)
-            
-      search_term = get_term(request.form['search_term'])
+      page = request.args.get('page', 1, type=int)  # change for POST
 
-      search_term = get_term(search_term)
+    #   data = request.get_json('searchTerm')
+    #   term = data['searchTerm']
+    #   search_term = get_term(term)
 
-      questions = Question.query.filter(Question.question.ilike(search_term)).all()
+      questions = Question.query.filter(Question.question.ilike('%autobiography%')).all()
 
-      return get_questions_package(page, questions)      
-
+      return get_questions_package(page, questions)
+    
   '''
   @TODO: (done)
   Create an endpoint to handle GET requests for questions, 
