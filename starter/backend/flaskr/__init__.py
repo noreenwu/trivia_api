@@ -8,6 +8,15 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+def get_all_categories():
+  categories = Category.query.all()
+  i = 1
+  cat_obj = {}
+  for c in categories:
+    cat_obj[i] = c.type
+    i = i+1
+  return cat_obj
+
 
 def create_app(test_config=None):
   # create and configure the app
@@ -18,7 +27,8 @@ def create_app(test_config=None):
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+#   cors = CORS(app, resources={r"/questions/*": {"origins": "*"}})
+  cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -39,6 +49,7 @@ def create_app(test_config=None):
       return 'Hello, messages'
 
   @app.route('/categories')
+#   @cross_origin
   def get_categories():
       categories = Category.query.all()
 
@@ -53,12 +64,18 @@ def create_app(test_config=None):
       return jsonify(cat_obj)
 
 
-  @app.route('/questions')
-  def get_questions():
+
+
+
+
+
+  @app.route('/categories/<int:id>/questions')
+  def get_questions_by_cat(id):
       page = request.args.get('page', 1, type=int)
 
       startIdx = (page-1) * QUESTIONS_PER_PAGE    
-      questions = Question.query.all()
+      questions = Question.query.filter_by(category=id).all()
+
       app.logger.info("total questions %d",len(questions))
 
       if startIdx > len(questions):
@@ -69,17 +86,73 @@ def create_app(test_config=None):
       else:
           app.logger.info("getting questions startIdx %d", startIdx)
           endIdx = (page * QUESTIONS_PER_PAGE)
+
           endIdx = min(endIdx, len(questions))          
           app.logger.info("and the ending index is %d", endIdx)
 
           thisPageQuestions = questions[startIdx:endIdx]
-          app.logger.info("thispagequestions is %d", len(thisPageQuestions))
+          num_questions_this_page = len(thisPageQuestions)
+          app.logger.info("thispagequestions is %d", num_questions_this_page)
           q_obj = {}
           i = 1
           for q in thisPageQuestions:
               q_obj[i] = q.question
               i = i + 1
-          return jsonify(q_obj)
+          results = {}              
+          results['questions'] = q_obj 
+          results['total_questions'] = num_questions_this_page
+          results['currentCategory'] = id
+          return jsonify(results)
+
+
+  @app.route('/questions')
+  def get_questions():
+      page = request.args.get('page', 1, type=int)
+
+      startIdx = (page-1) * QUESTIONS_PER_PAGE    
+      questions = Question.query.all()
+
+      app.logger.info("total questions %d",len(questions))
+
+      if startIdx > len(questions):
+          app.logger.info("startIdx ")
+          app.logger.info("questions length %d", len(questions))
+          return jsonify({0: 'empty'})
+
+      else:
+          app.logger.info("getting questions startIdx %d", startIdx)
+          endIdx = (page * QUESTIONS_PER_PAGE)
+
+          endIdx = min(endIdx, len(questions))          
+          app.logger.info("and the ending index is %d", endIdx)
+       
+
+          thisPageQuestions = questions[startIdx:endIdx]
+          num_questions_this_page = len(thisPageQuestions)
+          app.logger.info("thispagequestions is %d", num_questions_this_page)
+ 
+
+          q_obj = {}
+          i = 1
+          for q in thisPageQuestions:
+              q_obj[i] = { 'id': q.id, 
+                           'question': q.question,
+                           'answer': q.answer,
+                           'difficulty': q.difficulty,
+                           'category': q.category }
+              i = i + 1
+
+
+          qresults = {}
+          qresults['questions'] = q_obj
+          qresults['total_questions'] = num_questions_this_page
+          qresults['categories'] = get_all_categories()
+          app.logger.info("results for questions %d", len(qresults['questions']))
+          return jsonify(qresults)
+        #   return jsonify({ 'questions':,
+        #                    'total_questions': num_questions_this_page,
+        #                  })
+          
 
   '''
   @TODO: 

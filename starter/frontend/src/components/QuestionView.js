@@ -30,13 +30,14 @@ class QuestionView extends Component {
       datatType: "jsonp",
       success: (result) => {
         this.setState({
-          questions: [ { id: 5,
-                         question: 'Whose autobiography is titled IKWCBS',
-                         answer: 'Maya Angelou',
-                         difficulty: 2, 
-                         category: 4
-                        }],
-          totalQuestions: 1,
+          // questions: [ { id: 5,
+          //                question: 'Whose autobiography is titled IKWCBS',
+          //                answer: 'Maya Angelou',
+          //                difficulty: 2, 
+          //                category: 4
+          //               }],
+          questions: Object.values(result.questions),
+          totalQuestions: Object.values(result.questions).length,
           categories: result.categories,
           // currentCategory: result.currentCategory
 
