@@ -65,6 +65,15 @@ def get_questions_package(page, questions):
     return jsonify(qresults)
 
 
+#----------------------------------------------------------------------------#
+#  Given a Search Term, Return a Lower Case Version, Enclosed with %
+#----------------------------------------------------------------------------#
+def get_term(term):    
+  term_lower = term.lower()
+  term_lower = '%' + term_lower + '%'
+  return term_lower
+
+
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
@@ -135,9 +144,20 @@ def create_app(test_config=None):
       return get_questions_package(page, questions)
 
           
+  @app.route('/questions/search', methods=['POST'])
+  def search_questions():
+      page = request.args.get('page', 1, type=int)
+            
+      search_term = get_term(request.form['search_term'])
+
+      search_term = get_term(search_term)
+
+      questions = Question.query.filter(Question.question.ilike(search_term)).all()
+
+      return get_questions_package(page, questions)      
 
   '''
-  @TODO: 
+  @TODO: (done)
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
@@ -179,8 +199,9 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
 
+
   '''
-  @TODO: 
+  @TODO:  (done)
   Create a GET endpoint to get questions based on category. 
 
   TEST: In the "List" tab / main screen, clicking on one of the 
