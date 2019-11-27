@@ -95,7 +95,7 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `http://localhost:5000/questions/search`, //TODO: update request URL
+      url: `http://localhost:5000/search`, 
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -108,7 +108,7 @@ class QuestionView extends Component {
         this.setState({
           questions: Object.values(result.questions),
           totalQuestions: result.total_questions,
-          currentCategory: result.current_category })
+          currentCategory: result.currentCategory })
         return;
       },
       error: (error) => {

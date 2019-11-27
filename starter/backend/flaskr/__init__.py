@@ -146,11 +146,11 @@ def create_app(test_config=None):
   def search_questions():
       page = request.args.get('page', 1, type=int)  # change for POST
 
-    #   data = request.get_json('searchTerm')
-    #   term = data['searchTerm']
-    #   search_term = get_term(term)
+      data = request.get_json('searchTerm')
+      term = data['searchTerm']
+      search_term = get_term(term)
 
-      questions = Question.query.filter(Question.question.ilike('%autobiography%')).all()
+      questions = Question.query.filter(Question.question.ilike(search_term)).all()
 
       return get_questions_package(page, questions)
     
@@ -219,6 +219,30 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+
+
+  @app.route('/quizzes', methods=['POST'])
+  def get_quiz_question():
+    # given category, previous questions, return a random remaining question from the category
+  
+    data = request.get_json('anything')
+    previous_questions = data['previous_questions']
+    quiz_category = data['quiz_category']
+    app.logger.info("quiz_category was %s", quiz_category)
+
+    # query the category 
+    questions = Question.query.filter(Question.category==quiz_category).filter(~Question.id.in_(previous_questions)).all()
+
+    # questions = questions.filter(~Question.id.in_([5])).all()
+    # return "length of questions returned was " + str(len(questions))
+    if len(questions) > 1:
+        rand_idx = random.randint(0, len(questions)-1)
+        return "would return question id " + str(questions[rand_idx].id)
+    else:
+        return "would return question id " + str(questions[0].id)
+    #     return questions[rand_idx].question
+    # else:
+    #     return questions[0].question
 
   '''
   @TODO: 
