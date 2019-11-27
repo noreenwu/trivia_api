@@ -17,6 +17,17 @@ def get_all_categories():
     i = i+1
   return cat_obj
 
+def get_all_questions(questions):
+  i = 1
+  q_obj = {}
+  for q in questions:
+    q_obj[i] = { 'id': q.id, 
+                'question': q.question,
+                'answer': q.answer,
+                'difficulty': q.difficulty,
+                'category': q.category }
+    i = i + 1    
+  return q_obj  
 
 def create_app(test_config=None):
   # create and configure the app
@@ -131,17 +142,8 @@ def create_app(test_config=None):
           num_questions_this_page = len(thisPageQuestions)
           app.logger.info("thispagequestions is %d", num_questions_this_page)
  
-
           q_obj = {}
-          i = 1
-          for q in thisPageQuestions:
-              q_obj[i] = { 'id': q.id, 
-                           'question': q.question,
-                           'answer': q.answer,
-                           'difficulty': q.difficulty,
-                           'category': q.category }
-              i = i + 1
-
+          q_obj = get_all_questions(thisPageQuestions)
 
           qresults = {}
           qresults['questions'] = q_obj
@@ -149,9 +151,6 @@ def create_app(test_config=None):
           qresults['categories'] = get_all_categories()
           app.logger.info("results for questions %d", len(qresults['questions']))
           return jsonify(qresults)
-        #   return jsonify({ 'questions':,
-        #                    'total_questions': num_questions_this_page,
-        #                  })
           
 
   '''
