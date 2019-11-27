@@ -120,38 +120,10 @@ def create_app(test_config=None):
   def get_questions_by_cat(id):
       page = request.args.get('page', 1, type=int)
 
-
       questions = Question.query.filter_by(category=id).all()
-      
+
       return get_questions_package(page, questions)
-    #   startIdx = (page-1) * QUESTIONS_PER_PAGE    
-    #   app.logger.info("total questions %d",len(questions))
 
-    #   if startIdx > len(questions):
-    #       app.logger.info("startIdx ")
-    #       app.logger.info("questions length %d", len(questions))
-    #       return jsonify({0: 'empty'})
-
-    #   else:
-    #       app.logger.info("getting questions startIdx %d", startIdx)
-    #       endIdx = (page * QUESTIONS_PER_PAGE)
-
-    #       endIdx = min(endIdx, len(questions))          
-    #       app.logger.info("and the ending index is %d", endIdx)
-
-    #       thisPageQuestions = questions[startIdx:endIdx]
-    #       num_questions_this_page = len(thisPageQuestions)
-    #       app.logger.info("thispagequestions is %d", num_questions_this_page)
-    #       q_obj = {}
-    #       i = 1
-    #       for q in thisPageQuestions:
-    #           q_obj[i] = q.question
-    #           i = i + 1
-    #       results = {}              
-    #       results['questions'] = q_obj 
-    #       results['total_questions'] = num_questions_this_page
-    #       results['currentCategory'] = id
-    #       return jsonify(results)
 
 
   @app.route('/questions')
