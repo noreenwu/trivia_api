@@ -145,7 +145,7 @@ def create_app(test_config=None):
 
           qresults = {}
           qresults['questions'] = q_obj
-          qresults['total_questions'] = num_questions_this_page
+          qresults['total_questions'] = len(questions)
           qresults['categories'] = get_all_categories()
           app.logger.info("results for questions %d", len(qresults['questions']))
           return jsonify(qresults)

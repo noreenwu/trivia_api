@@ -24,7 +24,7 @@ class QuestionView extends Component {
   getQuestions = () => {
     $.ajax({
       // url: `http://localhost:5000/questions?page=${this.state.page}`, //TODO: update request URL
-      url: `http://localhost:5000/questions`, //TODO: update request URL
+      url: `http://localhost:5000/questions?page=${this.state.page}`, //TODO: update request URL
 
       type: "GET",
       datatType: "jsonp",
@@ -37,7 +37,8 @@ class QuestionView extends Component {
           //                category: 4
           //               }],
           questions: Object.values(result.questions),
-          totalQuestions: Object.values(result.questions).length,
+          // totalQuestions: Object.values(result.questions).length,
+          totalQuestions: result.total_questions,
           categories: result.categories,
           // currentCategory: result.currentCategory
 
