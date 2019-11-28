@@ -36,6 +36,13 @@ def get_all_questions(questions):
     i = i + 1    
   return q_obj  
 
+# return success obj
+# --------------------
+def success_obj():
+    return jsonify({ "success": True,
+             "body": "hello",
+           })
+
 def get_questions_package(page, questions):
   startIdx = (page-1) * QUESTIONS_PER_PAGE    
   # app.logger.info("total questions %d",len(questions))
@@ -62,6 +69,7 @@ def get_questions_package(page, questions):
     qresults['questions'] = q_obj
     qresults['total_questions'] = len(questions)
     qresults['categories'] = get_all_categories()
+    qresults['success'] = True
     # app.logger.info("results for questions %d", len(qresults['questions']))
     return jsonify(qresults)
 
@@ -150,18 +158,35 @@ def create_app(test_config=None):
 
       return get_questions_package(page, questions)
 
-          
-  @app.route('/search', methods=['OPTIONS','POST'])
+  # @app.route('/questions/search', methods=['OPTIONS'])          
+  # def handle_options():
+  #     app.logger.info("options here")
+  #     return success_obj()
+
+  @app.route('/questions/search', methods=['POST'])
   def search_questions():
+      app.logger.info("in /questions/search")
+      if not request.json or not 'searchTerm' in request.json:
+          abort(400)
+
       page = request.args.get('page', 1, type=int)  # change for POST
 
       data = request.get_json('searchTerm')
       term = data['searchTerm']
       search_term = get_term(term)
 
-      questions = Question.query.filter(Question.question.ilike(search_term)).all()
+      error = False
+      try:
+        questions = Question.query.filter(Question.question.ilike(search_term)).all()
+      except:
+        error = True
+        app.logger.info("error occurred on search, aborting...")
 
-      return get_questions_package(page, questions)
+      if error:
+          abort(422)
+      
+      
+      return get_questions_package(page, questions), 201
     
   '''
   @TODO: (done)
@@ -234,32 +259,62 @@ def create_app(test_config=None):
   def get_quiz_question():
     # given category, previous questions, return a random remaining question from the category
   
-    data = request.get_json('previous_questions')       # something is required to get data but everything is returned
-    previous_questions = data['previous_questions']
-    quiz_category = data['quiz_category']
+    data1 = request.get_json()
+    previous_questions = data1.get('previous_questions', None)
+    quiz_category = data1.get('quiz_category', None)
     app.logger.info("quiz_category was %s", quiz_category)
 
-    questions = Question.query.filter(Question.category==quiz_category).filter(~Question.id.in_(previous_questions)).all()
+    error = False
+    try:
+        questions = Question.query.filter(Question.category==quiz_category).filter(~Question.id.in_(previous_questions)).all()
+    except:
+        error = True
+        app.logger.info("error occurred on querying for quiz data, aborting...")
 
-    result = {}
-    if len(questions) == 0:
-        result['question'] = {}
-        return jsonify(result)
-
-    if len(questions) > 1:
-        rand_idx = random.randint(0, len(questions)-1)
-        result['question'] = format_question(questions[rand_idx])
-
-        return jsonify(result)
+    if error:
+        abort(422)
     else:
-        result['question'] = format_question(questions[0])
-        return jsonify(result)
+        result = {}
+        if len(questions) == 0:
+            result['question'] = {}
+            return jsonify(result)
+
+        if len(questions) > 1:
+            rand_idx = random.randint(0, len(questions)-1)
+            result['question'] = format_question(questions[rand_idx])
+
+            return jsonify(result)
+        else:
+            result['question'] = format_question(questions[0])
+            return jsonify(result)
 
   '''
   @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
-  
+  @app.errorhandler(404)
+  def not_found(error):
+      return jsonify({
+          "success": False,
+          "error": 404,
+          "message": "Not found"
+      }), 404
+
+  @app.errorhandler(422)
+  def cannot_process(error):
+      return jsonify({
+          "success": False,
+          "error": 422,
+          "message": "Something wrong; cannot process"
+      }), 422
+
+  @app.errorhandler(400)
+  def cannot_process(error):
+      return jsonify({
+          "success": False,
+          "error": 400,
+          "message": "400: Bad request"
+      }), 400
   return app
 
