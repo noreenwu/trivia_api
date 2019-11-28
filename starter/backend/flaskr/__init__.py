@@ -280,8 +280,11 @@ def create_app(test_config=None):
     try:
         if quiz_category_id == 0:
           questions = Question.query.filter(~Question.id.in_(previous_questions)).all()
+          tot_questions = len(Question.query.all())
         else:  
           questions = Question.query.filter(Question.category==quiz_category_id).filter(~Question.id.in_(previous_questions)).all()
+          tot_questions = len(Question.query.filter(Question.category==quiz_category_id).all())
+
     except:
         error = True
         app.logger.info("error occurred on querying for quiz data, aborting...")
@@ -291,9 +294,14 @@ def create_app(test_config=None):
     else:
         result = {}
         if len(questions) == 0:
-            result['question'] = {}
+            result['question'] = jsonify({'id': 0,
+                                          'question': '',
+                                          'answer': '',
+                                          'difficulty': -1,
+                                          'category': 0})
             return jsonify(result)
-
+            
+        result['total_questions'] = tot_questions
         if len(questions) > 1:
             rand_idx = random.randint(0, len(questions)-1)
             result['question'] = format_question(questions[rand_idx])

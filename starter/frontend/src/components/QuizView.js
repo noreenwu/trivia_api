@@ -11,6 +11,7 @@ class QuizView extends Component {
     this.state = {
         quizCategory: null,
         previousQuestions: [], 
+        numTotalQuestions: 0,
         showAnswer: false,
         categories: {},
         numCorrect: 0,
@@ -22,7 +23,7 @@ class QuizView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `http://localhost:5000/categories`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -46,6 +47,13 @@ class QuizView extends Component {
   getNextQuestion = () => {
     const previousQuestions = [...this.state.previousQuestions]
     if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
+    if ((this.state.previousQuestions.length > 0) && (this.state.previousQuestions.length ===  this.state.numTotalQuestions-1)) {
+        console.log("no more questions, force end")
+        this.setState({
+          forceEnd: true
+        })
+        return
+    }
 
     $.ajax({
       url: 'http://localhost:5000/quizzes', //TODO: update request URL
@@ -64,6 +72,7 @@ class QuizView extends Component {
         this.setState({
           showAnswer: false,
           previousQuestions: previousQuestions,
+          numTotalQuestions: result.total_questions,          
           currentQuestion: result.question,
           guess: '',
           forceEnd: result.question ? false : true
@@ -139,12 +148,23 @@ class QuizView extends Component {
   renderCorrectAnswer(){
     const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
+    let displayNext = ''
+    console.log("num previous questions ", this.state.previousQuestions.length)
+    console.log("numTotalQ", this.state.numTotalQuestions)
+
+    if (this.state.previousQuestions.length <  this.state.numTotalQuestions-1) {
+      displayNext = 'Next Question'
+    }
+    else {
+      displayNext = "How'd I do?"
+    }
+                                                        
     return(
       <div className="quiz-play-holder">
         <div className="quiz-question">{this.state.currentQuestion.question}</div>
         <div className={`${evaluate ? 'correct' : 'wrong'}`}>{evaluate ? "You were correct!" : "You were incorrect"}</div>
         <div className="quiz-answer">{this.state.currentQuestion.answer}</div>
-        <div className="next-question button" onClick={this.getNextQuestion}> Next Question </div>
+        <div className={`next-question button`} onClick={this.getNextQuestion}>{displayNext} </div>
       </div>
     )
   }
