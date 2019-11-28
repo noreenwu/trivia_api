@@ -96,7 +96,7 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  app.logger.info("hello")
+  db = SQLAlchemy(app)
 
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
@@ -171,8 +171,9 @@ def create_app(test_config=None):
 
       page = request.args.get('page', 1, type=int)  # change for POST
 
-      data = request.get_json('searchTerm')
-      term = data['searchTerm']
+      # data = request.get_json('searchTerm')
+      # term = data['searchTerm']
+      term = request.get_json()['searchTerm']
       search_term = get_term(term)
 
       error = False
@@ -220,8 +221,54 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
+  @app.route('/questions/add', methods=['POST'])
+  def add_new_questions():
+
+    question_text = request.get_json()['question']
+    answer_text = request.get_json()['answer']
+    difficulty_rating = int(request.get_json()['difficulty'])
+    category_setting = int(request.get_json()['category'])
+
+    app.logger.info("question text was %s", question_text)
+    app.logger.info("answer text was %s", answer_text)
+    app.logger.info("difficulty was %d", difficulty_rating)
+    app.logger.info("category was %d", category_setting)
+
+    have_all_data = False
+    if question_text.strip() and answer_text.strip() and difficulty_rating > 0 and category_setting > 0:
+      have_all_data = True
+
+    # error = False
+    # try:     # make sure we have all the data we need for a new question
+    #   question_text
+    #   answer_text
+    #   difficulty_rating
+    #   category_setting
+    # except:
+    #   error = True
+
+    if not request.json or not have_all_data:
+        abort(400)    
+
+    error = False
+    try:
+      # insert new question into db
+      new_question = Question(question=question_text,answer=answer_text,
+                              difficulty=difficulty_rating,category=category_setting)
+
+      db.session.add(new_question)                              
+      db.session.commit()
+      return success_obj()
+    except:
+      error = True
+      app.logger.info("error occurred in adding a new question, aborting...")
+
+    if error:
+        abort(422)
+
+
   '''
-  @TODO: 
+  @TODO: (done)
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -243,7 +290,7 @@ def create_app(test_config=None):
 
 
   '''
-  @TODO: 
+  @TODO: (done)
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
@@ -257,9 +304,7 @@ def create_app(test_config=None):
 
   @app.route('/quizzes', methods=['POST'])
   def get_quiz_question():
-    # given category, previous questions, return a random remaining question from the category
-
-    ## WHAT HAPPENS IF ALL IS SELECTED?
+    # given category and list of previous question ids, return a random remaining question from the category
 
     app.logger.info("in /quizzes")
     if not request.json or not 'previous_questions' in request.json:
@@ -278,7 +323,7 @@ def create_app(test_config=None):
 
     error = False
     try:
-        if quiz_category_id == 0:
+        if quiz_category_id == 0:  # if user selects All categories
           questions = Question.query.filter(~Question.id.in_(previous_questions)).all()
           tot_questions = len(Question.query.all())
         else:  
@@ -300,7 +345,7 @@ def create_app(test_config=None):
                                           'difficulty': -1,
                                           'category': 0})
             return jsonify(result)
-            
+
         result['total_questions'] = tot_questions
         if len(questions) > 1:
             rand_idx = random.randint(0, len(questions)-1)
