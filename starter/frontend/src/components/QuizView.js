@@ -51,14 +51,14 @@ class QuizView extends Component {
       url: 'http://localhost:5000/quizzes', //TODO: update request URL
       type: "POST",
       dataType: 'json',
-      contentType: 'application/json',
+      contentType: 'application/json; charset=utf-8',
       data: JSON.stringify({
         previous_questions: previousQuestions,
         quiz_category: this.state.quizCategory
       }),
-      xhrFields: {
-        withCredentials: true
-      },
+      // xhrFields: {
+      //   withCredentials: true
+      // },
       crossDomain: true,
       success: (result) => {
         this.setState({

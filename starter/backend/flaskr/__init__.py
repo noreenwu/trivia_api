@@ -258,15 +258,22 @@ def create_app(test_config=None):
   @app.route('/quizzes', methods=['POST'])
   def get_quiz_question():
     # given category, previous questions, return a random remaining question from the category
-  
-    data1 = request.get_json()
-    previous_questions = data1.get('previous_questions', None)
-    quiz_category = data1.get('quiz_category', None)
-    app.logger.info("quiz_category was %s", quiz_category)
+
+    app.logger.info("in /quizzes")
+    if not request.json or not 'previous_questions' in request.json:
+        abort(400)  
+
+    qq = request.json['quiz_category']
+    quiz_category_id = qq['id']
+
+    previous_questions = request.get_json()['previous_questions']
+    app.logger.info("previous_questions was %s", previous_questions)    
+
+    previous_questions = []
 
     error = False
     try:
-        questions = Question.query.filter(Question.category==quiz_category).filter(~Question.id.in_(previous_questions)).all()
+        questions = Question.query.filter(Question.category==quiz_category_id).filter(~Question.id.in_(previous_questions)).all()
     except:
         error = True
         app.logger.info("error occurred on querying for quiz data, aborting...")
