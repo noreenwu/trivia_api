@@ -259,21 +259,29 @@ def create_app(test_config=None):
   def get_quiz_question():
     # given category, previous questions, return a random remaining question from the category
 
+    ## WHAT HAPPENS IF ALL IS SELECTED?
+
     app.logger.info("in /quizzes")
     if not request.json or not 'previous_questions' in request.json:
         abort(400)  
 
-    qq = request.json['quiz_category']
-    quiz_category_id = qq['id']
+    quiz_cat = request.json['quiz_category']
+    quiz_category_id = quiz_cat['id']
 
     previous_questions = request.get_json()['previous_questions']
-    app.logger.info("previous_questions was %s", previous_questions)    
+    # app.logger.info("previous_questions was %s", quiz_cat)    
 
-    previous_questions = []
+    # app.logger.info("previous_questions was %s", previous_questions)    
+
+    if previous_questions is None:
+      previous_questions = []
 
     error = False
     try:
-        questions = Question.query.filter(Question.category==quiz_category_id).filter(~Question.id.in_(previous_questions)).all()
+        if quiz_category_id == 0:
+          questions = Question.query.filter(~Question.id.in_(previous_questions)).all()
+        else:  
+          questions = Question.query.filter(Question.category==quiz_category_id).filter(~Question.id.in_(previous_questions)).all()
     except:
         error = True
         app.logger.info("error occurred on querying for quiz data, aborting...")
