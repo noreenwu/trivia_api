@@ -50,10 +50,16 @@ class FormView extends Component {
       crossDomain: true,
       success: (result) => {
         document.getElementById("add-question-form").reset();
+        // clear state
+        this.setState({  
+          question: "",
+          answer: "",
+          difficulty: 1,
+          category: 1,       
+        })        
         return;
       },
       error: (error) => {
-        console.log("this.state.question ", this.state.question)
         alert('Unable to add question. Please try your request again')
         return;
       }
@@ -97,7 +103,7 @@ class FormView extends Component {
                 })}
             </select>
           </label>
-          <input type="submit" className="button" value="Submit" />
+          <input type="submit" disabled={this.state.question === '' || this.state.answer === ''} className="button" value="Submit" />
         </form>
       </div>
     );
