@@ -209,9 +209,30 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  @app.route('/questions/<int:id>', methods=['DELETE'])
+  def delete_question(id):
+    app.logger.info("delete the id is %d", id)
+
+    error = False
+    try:
+      the_question = Question.query.filter_by(id=id).first()
+      the_question.delete()
+      app.logger.info("deleting %s", the_question.question)
+      # db.session.delete(the_question)
+      db.session.commit()
+    except:
+      error = True
+      app.logger.info("error occurred while trying to delete a question. Sorry...")
+
+    if error:
+      abort(422)      
+
+    app.logger.info("deletion made it")
+    return success_obj()
+
 
   '''
-  @TODO: 
+  @TODO: (done)
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
