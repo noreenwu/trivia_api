@@ -88,7 +88,7 @@ class QuizView extends Component {
 
   submitGuess = (event) => {
     event.preventDefault();
-    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
+    //const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     this.setState({
       numCorrect: !evaluate ? this.state.numCorrect : this.state.numCorrect + 1,
@@ -139,18 +139,44 @@ class QuizView extends Component {
     )
   }
 
+
+  checkMultiWordResponse = (guessArray, answerArray) => {
+    console.log("checking multiwordresponse: ", guessArray, answerArray)
+    for (let g of guessArray) {
+      if (g !== 'the') {
+        if (! answerArray.includes(g)) {
+          return false
+        }
+      }
+    }
+
+    for (let a of answerArray) {
+      if (a !== 'the') {
+        if (! guessArray.includes(a)) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
   evaluateAnswer = () => {
-    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
-    const answerArray = this.state.currentQuestion.answer.toLowerCase().split(' ');
-    return answerArray.includes(formatGuess)
+
+    const formattedGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
+    const formattedAnswer = this.state.currentQuestion.answer.toLowerCase()
+    const answerArray = formattedAnswer.split(' ')
+    const guessArray = formattedGuess.split(' ')
+
+
+    return this.checkMultiWordResponse(guessArray, answerArray)
+
   }
 
   renderCorrectAnswer(){
-    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
+    //const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     let displayNext = ''
-    console.log("num previous questions ", this.state.previousQuestions.length)
-    console.log("numTotalQ", this.state.numTotalQuestions)
+
 
     if (this.state.previousQuestions.length <  this.state.numTotalQuestions-1) {
       displayNext = 'Next Question'
