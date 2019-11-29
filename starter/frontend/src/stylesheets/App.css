@@ -42,3 +42,17 @@ input[type="submit"]:disabled {
   background: #dddddd;
 }
 
+.top-nav {
+  font-family: 'Helvetica';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1.0em;
+  padding-top: 20px;
+}
+.title {
+  font-size: .9em;
+}
+
+.category-nav {
+  display: block;
+}
