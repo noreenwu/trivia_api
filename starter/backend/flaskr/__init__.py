@@ -48,9 +48,8 @@ def get_questions_package(page, questions):
   # app.logger.info("total questions %d",len(questions))
 
   if startIdx > len(questions):
-    # app.logger.info("startIdx ")
-    # app.logger.info("questions length %d", len(questions))
-    return jsonify({0: 'empty'})   # actually return other info and only questions would be empty
+    abort(404)
+    # return jsonify({'success': False})   # actually return other info and only questions would be empty
 
   else:
     endIdx = (page * QUESTIONS_PER_PAGE)
@@ -158,10 +157,6 @@ def create_app(test_config=None):
 
       return get_questions_package(page, questions)
 
-  # @app.route('/questions/search', methods=['OPTIONS'])          
-  # def handle_options():
-  #     app.logger.info("options here")
-  #     return success_obj()
 
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
@@ -387,7 +382,7 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 404,
-          "message": "Not found"
+          "message": "Resource not found"
       }), 404
 
   @app.errorhandler(422)
