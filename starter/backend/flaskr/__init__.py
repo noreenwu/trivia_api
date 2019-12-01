@@ -9,17 +9,31 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 MOST_DIFFICULT_RATING = 5
 
+
 # ------------------------------------------------------------------------------
-#  Retrieve the categories from the database and return them in an object format
+#  Retrieve the categories from the database and return them in an object format.
+#  This is typically called from an endpoint that needs to return categories
+#  as part of its results, such as /questions
 # ------------------------------------------------------------------------------
 def get_all_categories():
-  categories = Category.query.all()
+
+  error = False
+  try: 
+    categories = Category.query.all()
+  except:
+    error = True
+
+  if error:
+    abort(422)
+
   i = 1
   cat_obj = {}
   for c in categories:
     cat_obj[i] = c.type
     i = i+1
+    
   return cat_obj
+
 
 # ------------------------------------------------------------------------------
 #  Given array of Question objects, return object, using index as key
@@ -36,11 +50,12 @@ def get_all_questions(questions):
     i = i + 1    
   return q_obj  
 
+
 # return success obj
 # --------------------
 def success_obj():
     return jsonify({ "success": True,
-             "body": "hello",
+            #  "body": "hello",
            })
 
 
@@ -49,23 +64,20 @@ def is_valid_difficulty(rating):
     return True
   return False  
 
+
 def get_questions_package(page, questions):
   startIdx = (page-1) * QUESTIONS_PER_PAGE    
-  # app.logger.info("total questions %d",len(questions))
 
   if startIdx > len(questions):
     abort(404)
-    # return jsonify({'success': False})   # actually return other info and only questions would be empty
 
   else:
     endIdx = (page * QUESTIONS_PER_PAGE)
 
     endIdx = min(endIdx, len(questions))          
-    # app.logger.info("and the ending index is %d", endIdx)
 
     thisPageQuestions = questions[startIdx:endIdx]
     num_questions_this_page = len(thisPageQuestions)
-    # app.logger.info("thispagequestions is %d", num_questions_this_page)
 
     q_obj = {}
     q_obj = get_all_questions(thisPageQuestions)
@@ -75,7 +87,7 @@ def get_questions_package(page, questions):
     qresults['total_questions'] = len(questions)
     qresults['categories'] = get_all_categories()
     qresults['success'] = True
-    # app.logger.info("results for questions %d", len(qresults['questions']))
+
     return jsonify(qresults)
 
 
