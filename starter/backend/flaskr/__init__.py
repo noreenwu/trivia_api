@@ -97,40 +97,26 @@ def create_app(test_config=None):
   setup_db(app)
   db = SQLAlchemy(app)
 
-  '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-  '''
-#   cors = CORS(app, resources={r"/questions/*": {"origins": "*"}})
+ 
   cors = CORS(app, resources={r"/*": {"origins": "*"}})
-#   cors = CORS(app)
 
-  '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
-  '''
+
   @app.after_request
   def after_request(response):
-      response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+      # response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
       response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
       return response
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests 
-  for all available categories.
-  '''
-  @app.route('/messages')
-  def get_messages():
-      return 'Hello, messages'
-
+#------------------------------------------------------------------------------------------
+#  The endpoint /categories (GET) returns an object of all available categories.
+#------------------------------------------------------------------------------------------
   @app.route('/categories')
   def get_categories():
       categories = Category.query.all()
 
-    #   str = ""
       i = 1
       cat_obj = {}
       for c in categories:
-        #  str = str + ' ' + c.type
          cat_obj[i] = c.type
          i = i+1
       app.logger.info(cat_obj)
@@ -138,7 +124,10 @@ def create_app(test_config=None):
       return jsonify(categories)
 
 
-
+# -------------------------------------------------------------------------------------------
+#  /categories/<int:id>/questions (GET) returns the questions that will appear 
+#  on the specified page. There are 10 pages per question (const defined above)
+# -------------------------------------------------------------------------------------------
   @app.route('/categories/<int:id>/questions')
   def get_questions_by_cat(id):
       page = request.args.get('page', 1, type=int)
@@ -148,7 +137,9 @@ def create_app(test_config=None):
       return get_questions_package(page, questions)
 
 
-
+# -------------------------------------------------------------------------------------------
+#  /questions (GET) returns questions from all categories that will appear on the specified page
+# -------------------------------------------------------------------------------------------
   @app.route('/questions')
   def get_questions():
       page = request.args.get('page', 1, type=int)
@@ -158,6 +149,10 @@ def create_app(test_config=None):
       return get_questions_package(page, questions)
 
 
+# -------------------------------------------------------------------------------------------
+#  /questions/search (POST) returns questions that include the user-provided search term. 
+#  Both the search term and the question are lowercased to ignore case.
+# -------------------------------------------------------------------------------------------
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
       app.logger.info("in /questions/search")
@@ -166,8 +161,6 @@ def create_app(test_config=None):
 
       page = request.args.get('page', 1, type=int)  # change for POST
 
-      # data = request.get_json('searchTerm')
-      # term = data['searchTerm']
       term = request.get_json()['searchTerm']
       search_term = get_term(term)
 
@@ -184,18 +177,6 @@ def create_app(test_config=None):
       
       return get_questions_package(page, questions), 201
     
-  '''
-  @TODO: (done)
-  Create an endpoint to handle GET requests for questions, 
-  including pagination (every 10 questions). 
-  This endpoint should return a list of questions, 
-  number of total questions, current category, categories. 
-
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions. 
-  '''
 
   '''
   @TODO: 
@@ -204,9 +185,12 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+# -------------------------------------------------------------------------------------------
+#  /questions/<int:id> (DELETE) retrieves the question specified by id in the url and
+#  deletes it from the database
+# -------------------------------------------------------------------------------------------
   @app.route('/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
-    app.logger.info("delete the id is %d", id)
 
     error = False
     try:
@@ -222,7 +206,6 @@ def create_app(test_config=None):
     if error:
       abort(422)      
 
-    app.logger.info("deletion made it")
     return success_obj()
 
 
@@ -236,7 +219,11 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
-
+# -------------------------------------------------------------------------------------------
+#  /questions/add (POST) accepts new question text, new answer text and difficulty 
+#  and category from the Add Question form in the user interface. If not all the 
+#  data is provided, then an error type 400 is returned, otherwise the new question is added
+# -------------------------------------------------------------------------------------------
   @app.route('/questions/add', methods=['POST'])
   def add_new_questions():
 
@@ -283,41 +270,11 @@ def create_app(test_config=None):
         abort(422)
 
 
-  '''
-  @TODO: (done)
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
-
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
-
-
-  '''
-  @TODO:  (done)
-  Create a GET endpoint to get questions based on category. 
-
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
-
-
-  '''
-  @TODO: (done)
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
-
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
-
-
+# -------------------------------------------------------------------------------------------
+#  /quizzes (POST) returns a random question from the specified category (or from the
+#  general pool of questions if ALL is specified). Questions that have already been
+#  posed this session are omitted; they are passed in as previous_questions from the front-end
+# -------------------------------------------------------------------------------------------
   @app.route('/quizzes', methods=['POST'])
   def get_quiz_question():
     # given category and list of previous question ids, return a random remaining question from the category
