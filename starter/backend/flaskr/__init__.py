@@ -7,7 +7,7 @@ import logging
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
-
+MOST_DIFFICULT_RATING = 5
 
 # ------------------------------------------------------------------------------
 #  Retrieve the categories from the database and return them in an object format
@@ -42,6 +42,12 @@ def success_obj():
     return jsonify({ "success": True,
              "body": "hello",
            })
+
+
+def is_valid_difficulty(rating):
+  if rating > 0 and rating <= MOST_DIFFICULT_RATING:
+    return True
+  return False  
 
 def get_questions_package(page, questions):
   startIdx = (page-1) * QUESTIONS_PER_PAGE    
@@ -232,23 +238,10 @@ def create_app(test_config=None):
     difficulty_rating = int(request.get_json()['difficulty'])
     category_setting = int(request.get_json()['category'])
 
-    app.logger.info("question text was %s", question_text)
-    app.logger.info("answer text was %s", answer_text)
-    app.logger.info("difficulty was %d", difficulty_rating)
-    app.logger.info("category was %d", category_setting)
-
     have_all_data = False
-    if question_text.strip() and answer_text.strip() and difficulty_rating > 0 and category_setting > 0:
+    if question_text.strip() and answer_text.strip() and is_valid_difficulty(difficulty_rating) and category_setting > 0:
       have_all_data = True
 
-    # error = False
-    # try:     # make sure we have all the data we need for a new question
-    #   question_text
-    #   answer_text
-    #   difficulty_rating
-    #   category_setting
-    # except:
-    #   error = True
 
     if not request.json or not have_all_data:
         abort(400)    
@@ -287,9 +280,6 @@ def create_app(test_config=None):
     quiz_category_id = quiz_cat['id']
 
     previous_questions = request.get_json()['previous_questions']
-    # app.logger.info("previous_questions was %s", quiz_cat)    
-
-    # app.logger.info("previous_questions was %s", previous_questions)    
 
     if previous_questions is None:
       previous_questions = []

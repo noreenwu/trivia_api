@@ -81,6 +81,33 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
 
+    # test blank answer returns 400
+    def test_incomplete_create_question2(self):
+        res = self.client().post('/questions/add', json={'question': 'question with no answer',
+                                                         'answer': '',
+                                                         'category': 1,
+                                                         'difficulty': 1})
+
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+
+
+    # test blank answer returns 400
+    def test_incomplete_create_question3(self):
+        res = self.client().post('/questions/add', json={'question': 'question with no category',
+                                                         'answer': 'answer but no category',
+                                                         'category': -1,
+                                                         'difficulty': 1})
+
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+
+
+
     # def test_delete_question(self):
     #     res = self.client().delete('/questions/<int> id')
 
