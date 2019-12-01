@@ -35,8 +35,9 @@ class TriviaTestCase(unittest.TestCase):
 
 
     """
+    # test getting a page of questions
     def test_get_paginated_questions(self):
-        res = self.client().get('/questions')
+        res = self.client().get('/questions?page=2')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -45,6 +46,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
         self.assertTrue(data['questions'])
 
+    # test requesting a page beyond the number of possible pages returns 404
     def test_404_sent_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=100')
         data = json.loads(res.data)
@@ -52,6 +54,36 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource not found')
+
+
+    # test creation of a new question
+    def test_create_question(self):
+        res = self.client().post('/questions/add', json={ 'question': 'test question?',
+                                                          'answer': 'test answer',
+                                                          'category': 1,
+                                                          'difficulty': 1} )
+        data = json.loads(res.data)
+        question = Question.query.filter_by(answer="calf").first()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    # test blank question returns 400
+    def test_incomplete_create_question(self):
+        res = self.client().post('/questions/add', json={'question': '',
+                                                         'answer': 'answered',
+                                                         'category': 1,
+                                                         'difficulty': 1})
+
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+
+    # def test_delete_question(self):
+    #     res = self.client().delete('/questions/<int> id')
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
