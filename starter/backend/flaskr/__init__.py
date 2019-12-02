@@ -59,12 +59,23 @@ def success_obj():
            })
 
 
+# ------------------------------------------------------------------
+#  is_valid_difficulty: Is the difficulty rating between 1 and MOST_DIFFICULT_RATING
+# ------------------------------------------------------------------
 def is_valid_difficulty(rating):
   if rating > 0 and rating <= MOST_DIFFICULT_RATING:
     return True
   return False  
 
 
+# ------------------------------------------------------------------
+#  get_questions_package: Several endpoints utilize this general questions packager.
+#  The endpoints for getting (/questions), questions by category
+#  (/categories/<int:id>/questions) and search for question
+#  (/questions/search) all retrieve different batches of questions,
+#  and then those questions need to be packaged by specified page
+#  into a json object. That work is done here
+# ------------------------------------------------------------------
 def get_questions_package(page, questions):
   startIdx = (page-1) * QUESTIONS_PER_PAGE    
 
@@ -91,16 +102,18 @@ def get_questions_package(page, questions):
     return jsonify(qresults)
 
 
-#----------------------------------------------------------------------------#
-#  Given a Search Term, Return a Lower Case Version, Enclosed with %
-#----------------------------------------------------------------------------#
+#----------------------------------------------------------------------------
+#  get_term: given a Search Term, return a lower case version, enclosed with %
+#----------------------------------------------------------------------------
 def get_term(term):    
   term_lower = term.lower()
   term_lower = '%' + term_lower + '%'
   return term_lower
 
-#  Format a Question
 
+# ----------------------------------------------------------------------------
+#  format_question: Put a Question returned from the database into key:value format
+# ----------------------------------------------------------------------------
 def format_question(question):
   return {'id': question.id,
           'question': question.question,
@@ -196,13 +209,6 @@ def create_app(test_config=None):
       return get_questions_package(page, questions), 201
     
 
-  '''
-  @TODO: 
-  Create an endpoint to DELETE question using a question ID. 
-
-  TEST: When you click the trash icon next to a question, the question will be removed.
-  This removal will persist in the database and when you refresh the page. 
-  '''
 # -------------------------------------------------------------------------------------------
 #  /questions/<int:id> (DELETE) retrieves the question specified by id in the url and
 #  deletes it from the database
@@ -331,11 +337,10 @@ def create_app(test_config=None):
             result['question'] = format_question(questions[0])
             return jsonify(result)
 
-  '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
-  '''
+# ---------------------------------------------------------------------------
+#  If user specifies a page beyond which there are questions, return a 404
+#  There is nothing defined at localhost:5000/, so that also returns 404
+# ---------------------------------------------------------------------------
   @app.errorhandler(404)
   def not_found(error):
       return jsonify({
@@ -344,6 +349,10 @@ def create_app(test_config=None):
           "message": "Resource not found"
       }), 404
 
+# ---------------------------------------------------------------------------
+# This error is triggered if something faulty happened on the server side,
+# such as not being able to make a database request
+# ---------------------------------------------------------------------------
   @app.errorhandler(422)
   def cannot_process(error):
       return jsonify({
@@ -352,6 +361,10 @@ def create_app(test_config=None):
           "message": "Something wrong; cannot process"
       }), 422
 
+# ---------------------------------------------------------------------------
+# This is an error caused by improper use of an endpoint, or insufficient
+# or incorrect input values, such as an blank question text when creating a question
+# ---------------------------------------------------------------------------
   @app.errorhandler(400)
   def cannot_process(error):
       return jsonify({
