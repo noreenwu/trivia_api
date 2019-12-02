@@ -8,6 +8,8 @@ import $ from 'jquery';
 const QUESTIONS_PER_PAGE = 6
 const API_SERVER = 'http://localhost:5000'
 
+
+
 class QuestionView extends Component {
   constructor(){
     super();
@@ -30,12 +32,24 @@ class QuestionView extends Component {
     this.setState({
       currentFunction : newFunc
     })
+
   }
 
   saveSearchTerm = (searchTerm) => {
     this.setState({
       searchTerm: searchTerm
     })
+  }
+
+  adjustPageNumber() {
+    let numQuestionsAfterDeletion = this.state.totalQuestions - 1
+    let numPages = Math.ceil((numQuestionsAfterDeletion) / QUESTIONS_PER_PAGE)
+
+    if (this.state.page > numPages) {
+        this.setState({
+          page: numPages
+        })
+    }
   }
 
   getQuestions = () => {
@@ -74,7 +88,7 @@ class QuestionView extends Component {
     }
   }
 
-  createPagination(){
+  createPagination() {
     let pageNumbers = [];
     let maxPage = Math.ceil(this.state.totalQuestions / QUESTIONS_PER_PAGE)
     for (let i = 1; i <= maxPage; i++) {
@@ -91,6 +105,7 @@ class QuestionView extends Component {
   getByCategory= (id, pg) => {
     this.saveCurrentFunction(this.getByCategory)    
     console.log("getByCategory")
+ 
     $.ajax({
       url: `${API_SERVER}/categories/${id}/questions?page=${pg}`, 
       // url: `${API_SERVER}/categories/${id}/questions`, 
@@ -141,11 +156,14 @@ class QuestionView extends Component {
   questionAction = (id) => (action) => {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
+
         $.ajax({
           url: `${API_SERVER}/questions/${id}`, 
           type: "DELETE",
           success: (result) => {
-            this.getQuestions();
+            this.adjustPageNumber() 
+            this.state.currentFunction(this.state.currentCategory, this.state.page)
+            //this.getQuestions();            
           },
           error: (error) => {
             alert('Unable to load questions. Please try your request again')
