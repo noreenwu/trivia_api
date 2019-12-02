@@ -162,7 +162,12 @@ class QuestionView extends Component {
           type: "DELETE",
           success: (result) => {
             this.adjustPageNumber() 
-            this.state.currentFunction(this.state.currentCategory, this.state.page)
+            if (this.state.currentFunction === this.submitSearch ) {
+              this.state.currentFunction(this.state.searchTerm)
+            }
+            else {
+              this.state.currentFunction(this.state.currentCategory, this.state.page)
+            }
             //this.getQuestions();            
           },
           error: (error) => {
