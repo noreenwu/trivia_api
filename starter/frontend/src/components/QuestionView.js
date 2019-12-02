@@ -17,7 +17,8 @@ class QuestionView extends Component {
       totalQuestions: 0,
       categories: {},
       currentCategory: null,
-    
+      currentFunction: this.getQuestions,
+      searchTerm: ''
     }
   }
 
@@ -25,7 +26,20 @@ class QuestionView extends Component {
     this.getQuestions();
   }
 
+  saveCurrentFunction = (newFunc) => {
+    this.setState({
+      currentFunction : newFunc
+    })
+  }
+
+  saveSearchTerm = (searchTerm) => {
+    this.setState({
+      searchTerm: searchTerm
+    })
+  }
+
   getQuestions = () => {
+    this.saveCurrentFunction(this.getQuestions)
 
     $.ajax({
       // url: `http://localhost:5000/questions?page=${this.state.page}`, 
@@ -75,10 +89,11 @@ class QuestionView extends Component {
   }
 
   getByCategory= (id, pg) => {
+    this.saveCurrentFunction(this.getByCategory)    
     console.log("getByCategory")
     $.ajax({
-      url: `http://localhost:5000/categories/${id}/questions?page=${pg}`, 
-      // url: `http://localhost:5000/categories/${id}/questions`, 
+      url: `${API_SERVER}/categories/${id}/questions?page=${pg}`, 
+      // url: `${API_SERVER}/categories/${id}/questions`, 
 
       type: "GET",
       success: (result) => {
@@ -96,8 +111,11 @@ class QuestionView extends Component {
   }
 
   submitSearch = (searchTerm) => {
+    this.saveCurrentFunction(this.submitSearch)
+    this.saveSearchTerm(searchTerm)    
+
     $.ajax({
-      url: `http://localhost:5000/questions/search`, 
+      url: `${API_SERVER}/questions/search`, 
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -124,7 +142,7 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `http://localhost:5000/questions/${id}`, 
+          url: `${API_SERVER}/questions/${id}`, 
           type: "DELETE",
           success: (result) => {
             this.getQuestions();
