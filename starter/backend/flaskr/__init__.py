@@ -38,7 +38,7 @@ def get_all_categories():
 # ------------------------------------------------------------------------------
 #  Given array of Question objects, return object, using index as key
 # ------------------------------------------------------------------------------
-def get_all_questions(questions):
+def format_question_array(questions):
   i = 1
   q_obj = {}
   for q in questions:
@@ -54,10 +54,8 @@ def get_all_questions(questions):
 # return success obj
 # --------------------
 def success_obj():
-    return jsonify({ "success": True,
-            #  "body": "hello",
-           })
-
+    return jsonify({ "success": True })
+                 
 
 # ------------------------------------------------------------------
 #  is_valid_difficulty: Is the difficulty rating between 1 and MOST_DIFFICULT_RATING
@@ -76,7 +74,7 @@ def is_valid_difficulty(rating):
 #  and then those questions need to be packaged by specified page
 #  into a json object. That work is done here
 # ------------------------------------------------------------------
-def get_questions_package(page, questions):
+def get_questions_package(page, questions, cat):
   startIdx = (page-1) * QUESTIONS_PER_PAGE    
 
   if startIdx > len(questions):
@@ -91,13 +89,17 @@ def get_questions_package(page, questions):
     num_questions_this_page = len(thisPageQuestions)
 
     q_obj = {}
-    q_obj = get_all_questions(thisPageQuestions)
+    q_obj = format_question_array(thisPageQuestions)
 
-    qresults = {}
-    qresults['questions'] = q_obj
-    qresults['total_questions'] = len(questions)
-    qresults['categories'] = get_all_categories()
-    qresults['success'] = True
+    qresults = { 'questions': q_obj,
+                 'total_questions': len(questions),
+                 'categories': get_all_categories(),
+                 'currentCategory': cat,                # hardcoded
+                 'success': True }
+    # qresults['questions'] = q_obj
+    # qresults['total_questions'] = len(questions)
+    # qresults['categories'] = get_all_categories()
+    # qresults['success'] = True
 
     return jsonify(qresults)
 
@@ -165,7 +167,7 @@ def create_app(test_config=None):
 
       questions = Question.query.filter_by(category=id).all()
 
-      return get_questions_package(page, questions)
+      return get_questions_package(page, questions, id)
 
 
 # -------------------------------------------------------------------------------------------
@@ -177,7 +179,7 @@ def create_app(test_config=None):
 
       questions = Question.query.all()
 
-      return get_questions_package(page, questions)
+      return get_questions_package(page, questions, None)
 
 
 # -------------------------------------------------------------------------------------------
@@ -206,7 +208,7 @@ def create_app(test_config=None):
           abort(422)
       
       
-      return get_questions_package(page, questions), 201
+      return get_questions_package(page, questions, None), 201
     
 
 # -------------------------------------------------------------------------------------------

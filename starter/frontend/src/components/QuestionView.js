@@ -22,6 +22,7 @@ class QuestionView extends Component {
   }
 
   getQuestions = () => {
+
     $.ajax({
       // url: `http://localhost:5000/questions?page=${this.state.page}`, //TODO: update request URL
       url: `http://localhost:5000/questions?page=${this.state.page}`, //TODO: update request URL
@@ -58,7 +59,13 @@ class QuestionView extends Component {
   }
 
   selectPage(num) {
-    this.setState({page: num}, () => this.getQuestions());
+    console.log("selectPage current category is ", this.state.currentCategory)
+    if (this.state.currentCategory === undefined) {
+      this.setState({page: num}, () => this.getQuestions());
+    }
+    else {
+      this.setState({page: num}, () => this.getByCategory(this.state.currentCategory));
+    }
   }
 
   createPagination(){
@@ -77,7 +84,7 @@ class QuestionView extends Component {
 
   getByCategory= (id) => {
     $.ajax({
-      url: `http://localhost:5000/categories/${id}/questions`, //TODO: update request URL
+      url: `http://localhost:5000/categories/${id}/questions?page=${this.state.page}`, //TODO: update request URL
       type: "GET",
       success: (result) => {
          this.setState({
@@ -153,7 +160,7 @@ class QuestionView extends Component {
           <Search submitSearch={this.submitSearch}/>
         </div>
         <div className="questions-list">
-          <h2>Questions</h2>
+          <h2 className="title">Questions</h2>
           {this.state.questions.map((q, ind) => (
             <Question
               key={q.id}
