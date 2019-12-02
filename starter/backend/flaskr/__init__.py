@@ -6,7 +6,7 @@ import random
 import logging
 from models import setup_db, Question, Category
 
-QUESTIONS_PER_PAGE = 10
+QUESTIONS_PER_PAGE = 6
 MOST_DIFFICULT_RATING = 5
 
 
