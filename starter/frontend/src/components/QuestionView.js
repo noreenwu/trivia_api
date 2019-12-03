@@ -6,9 +6,7 @@ import Search from './Search';
 import $ from 'jquery';
 import { timingSafeEqual } from 'crypto';
 
-const QUESTIONS_PER_PAGE = 6
-const API_SERVER = 'http://localhost:5000'
-
+import { QUESTIONS_PER_PAGE, API_SERVER } from '../constants'
 
 
 class QuestionView extends Component {

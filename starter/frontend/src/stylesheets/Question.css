@@ -19,7 +19,8 @@
 
 .Question-holder {
   padding: 10px 20px;
-  border: 2px black solid;
+  border: 2px lightgrey solid;
+  border-radius: 10px;
   text-align: left;
   margin: 7px;
 }

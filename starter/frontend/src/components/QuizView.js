@@ -3,6 +3,8 @@ import $ from 'jquery';
 
 import '../stylesheets/QuizView.css';
 
+import { API_SERVER } from '../constants'
+
 const questionsPerPlay = 5; 
 
 class QuizView extends Component {
@@ -23,7 +25,7 @@ class QuizView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `http://localhost:5000/categories`, //TODO: update request URL
+      url: `${API_SERVER}/categories`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
