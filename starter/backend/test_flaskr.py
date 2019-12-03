@@ -35,6 +35,14 @@ class TriviaTestCase(unittest.TestCase):
 
 
     """
+    # test getting categories
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['categories'])
+
     # test getting a page of questions
     def test_get_paginated_questions(self):
         res = self.client().get('/questions?page=2')

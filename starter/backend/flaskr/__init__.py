@@ -145,7 +145,16 @@ def create_app(test_config=None):
 #------------------------------------------------------------------------------------------
   @app.route('/categories')
   def get_categories():
-      categories = Category.query.all()
+
+      error = False
+      try:
+        categories = Category.query.all()
+      except:
+        error = True
+
+
+      if error:
+        abort(422)  
 
       i = 1
       cat_obj = {}
@@ -188,6 +197,7 @@ def create_app(test_config=None):
 # -------------------------------------------------------------------------------------------
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
+
       app.logger.info("in /questions/search")
       if not request.json or not 'searchTerm' in request.json:
           abort(400)
