@@ -328,8 +328,7 @@ def create_app(test_config=None):
   def get_quiz_question():
     # given category and list of previous question ids, return a random remaining question from the category
 
-    app.logger.info("in /quizzes")
-    if not request.json or not 'previous_questions' in request.json:
+    if not request.json or not 'previous_questions' in request.json or not 'quiz_category' in request.json:
         abort(400)  
 
     quiz_cat = request.json['quiz_category']
@@ -366,13 +365,16 @@ def create_app(test_config=None):
             return jsonify(result)
 
         result['total_questions'] = tot_questions
+
+        # if more than one question to choose from, randomly select from the batch
         if len(questions) > 1:
             rand_idx = random.randint(0, len(questions)-1)
             result['question'] = format_question(questions[rand_idx])
-
+            result['success'] = True
             return jsonify(result)
         else:
             result['question'] = format_question(questions[0])
+            result['success'] = True            
             return jsonify(result)
 
 # ---------------------------------------------------------------------------
