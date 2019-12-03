@@ -229,15 +229,14 @@ def create_app(test_config=None):
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
 
-      app.logger.info("in /questions/search")
+
       if not request.json or not 'searchTerm' in request.json:
           abort(400)
 
-      # page = request.args.get('page', 1, type=int)  # change for POST
-      page = request.get_json()['page']
-      app.logger.info("search_questions page is %d", page)
-      if page is None:
+      if not 'page' in request.json:
         page = 1
+      else:
+        page = request.get_json()['page']
 
       term = request.get_json()['searchTerm']
 
@@ -254,7 +253,7 @@ def create_app(test_config=None):
           abort(422)
       
       
-      return get_questions_package(page, questions, None), 201
+      return get_questions_package(page, questions, None)
     
 
 # -------------------------------------------------------------------------------------------

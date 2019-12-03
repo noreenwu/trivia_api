@@ -91,6 +91,36 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
 
+    # test searching for a question
+    def test_search_question(self):
+        res = self.client().post('/questions/search', json={ 'searchTerm': 'Tom', 
+                                                             'page': 1})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['categories'])
+        self.assertTrue(data['questions'])
+
+
+    # test searching for a question with no results and no specified page
+        res = self.client().post('/questions/search', json={ 'searchTerm': 'zoology'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+
+    # test searching for a question with no searchTerm
+        res = self.client().post('/questions/search')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)        
+
+
     # test creation of a new question
     def test_create_question(self):
         res = self.client().post('/questions/add', json={ 'question': 'test question?',
