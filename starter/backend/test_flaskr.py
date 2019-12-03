@@ -184,25 +184,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
 
-
+    # test deletion of a question that exists
     def test_delete_question(self):
-        res = self.client().delete('/questions/6')
+        res = self.client().delete('/questions/9')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 6).one_or_none()
+        question = Question.query.filter(Question.id == 9).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(question, None)
 
-
+    # test deletion of a question that does not exist
     def test_delete_nonexistent_question(self):
         res = self.client().delete('/questions/1000')
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'Something wrong; cannot process')
+        self.assertEqual(data['message'], 'Bad request')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

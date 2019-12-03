@@ -264,15 +264,16 @@ def create_app(test_config=None):
   def delete_question(id):
 
     error = False
+    the_question = Question.query.filter_by(id=id).one_or_none()
+    if the_question is None:
+      abort(400)
+
     try:
-      the_question = Question.query.filter_by(id=id).first()
       the_question.delete()
-      app.logger.info("deleting %s", the_question.question)
-      # db.session.delete(the_question)
       db.session.commit()
     except:
       error = True
-      app.logger.info("error occurred while trying to delete a question. Sorry...")
+      app.logger.info("An error occurred while trying to delete a question.")
 
     if error:
       abort(422)      
@@ -407,7 +408,7 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 400,
-          "message": "400: Bad request"
+          "message": "Bad request"
       }), 400
   return app
 
