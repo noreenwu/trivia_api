@@ -192,9 +192,14 @@ def create_app(test_config=None):
       if not request.json or not 'searchTerm' in request.json:
           abort(400)
 
-      page = request.args.get('page', 1, type=int)  # change for POST
+      # page = request.args.get('page', 1, type=int)  # change for POST
+      page = request.get_json()['page']
+      app.logger.info("search_questions page is %d", page)
+      if page is None:
+        page = 1
 
       term = request.get_json()['searchTerm']
+
       search_term = get_term(term)
 
       error = False

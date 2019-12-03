@@ -4,6 +4,7 @@ import '../stylesheets/App.css';
 import Question from './Question';
 import Search from './Search';
 import $ from 'jquery';
+import { timingSafeEqual } from 'crypto';
 
 const QUESTIONS_PER_PAGE = 6
 const API_SERVER = 'http://localhost:5000'
@@ -52,7 +53,7 @@ class QuestionView extends Component {
     }
   }
 
-  getQuestions = () => {
+  getQuestions = () => {                // category and pg are determined elsewhere
     this.saveCurrentFunction(this.getQuestions)
 
     $.ajax({
@@ -65,7 +66,6 @@ class QuestionView extends Component {
         this.setState({
           questions: Object.values(result.questions),
           totalQuestions: result.total_questions,
-          // totalQuestions: 9,
           categories: result.categories,
           currentCategory: result.currentCategory
         })
@@ -79,12 +79,17 @@ class QuestionView extends Component {
   }
 
   selectPage(num) {
-    console.log("selectPage current category is ", this.state.currentCategory)
-    if (this.state.currentCategory === null) {
-      this.setState({page: num}, () => this.getQuestions());
+    if (this.state.currentFunction === this.submitSearch ) {
+      this.setState({ page: num }, 
+                      () => this.submitSearch(this.state.searchTerm));
     }
     else {
-      this.setState({page: num}, () => this.getByCategory(this.state.currentCategory, this.state.page));
+      if (this.state.currentCategory === null) {
+        this.setState({page: num}, () => this.getQuestions());
+      }
+      else {
+        this.setState({page: num}, () => this.getByCategory(this.state.currentCategory, this.state.page));
+      }
     }
   }
 
@@ -134,7 +139,7 @@ class QuestionView extends Component {
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
+      data: JSON.stringify({searchTerm: searchTerm, page: this.state.page}),
       // xhrFields: {
       //   withCredentials: true
       // },
