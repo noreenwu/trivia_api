@@ -295,7 +295,7 @@ def create_app(test_config=None):
     category_setting = int(request.get_json()['category'])
 
     have_all_data = False
-    if question_text.strip() and answer_text.strip() and is_valid_difficulty(difficulty_rating) and category_setting > 0:
+    if question_text.strip() and answer_text.strip() and is_valid_difficulty(difficulty_rating) and is_valid_category(category_setting):
       have_all_data = True
 
 
