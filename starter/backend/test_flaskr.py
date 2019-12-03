@@ -43,6 +43,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['categories'])
 
+    # test getting category with wrong endpoint
     def test_get_category_404(self):        
         res = self.client().get('/category')
         data = json.loads(res.data)
@@ -86,7 +87,7 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/categories/12/questions')
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
 
 

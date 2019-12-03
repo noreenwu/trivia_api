@@ -197,7 +197,7 @@ def create_app(test_config=None):
 
       error = False
       if not is_valid_category(id):
-        abort(422)
+        abort(404)
 
       try:
         questions = Question.query.filter_by(category=id).all()
@@ -205,7 +205,7 @@ def create_app(test_config=None):
         error = True
 
       if error:
-        abort(422)
+        abort(404)
 
       return get_questions_package(page, questions, id)
 
