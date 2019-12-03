@@ -46,6 +46,12 @@ class QuestionView extends Component {
     let numQuestionsAfterDeletion = this.state.totalQuestions - 1
     let numPages = Math.ceil((numQuestionsAfterDeletion) / QUESTIONS_PER_PAGE)
 
+    console.log("num pages is now ", numPages)
+    // numPages = Math.ceil(numPages, 1)
+    if (numPages === 0) {
+      numPages = 1
+    }
+
     if (this.state.page > numPages) {
         this.setState({
           page: numPages
