@@ -38,6 +38,9 @@ form {
   margin: auto;
 }
 
+input[type="search"] {
+  padding: 5px 8px;
+}
 input[type="submit"]:disabled {
   background: #dddddd;
 }

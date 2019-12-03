@@ -20,11 +20,12 @@ class Search extends Component {
     return (
       <form onSubmit={this.getInfo}>
         <input
+          type="search"
           placeholder="Search questions..."
           ref={input => this.search = input}
           onChange={this.handleInputChange}
         />
-        <input type="submit" value="Submit" className="button"/>
+        <input disabled={this.state.query === ''} type="submit" value="Submit" className="button"/>
       </form>
     )
   }
