@@ -36,6 +36,30 @@ def get_all_categories():
 
 
 # ------------------------------------------------------------------------------
+#  Is valid category: return True if the supplied category id exists in the db
+# ------------------------------------------------------------------------------
+def is_valid_category(id):
+
+  error = False
+  try: 
+    categories = Category.query.all()
+  except:
+    error = True
+      
+  if error:
+    abort(422)    
+
+  catList = []
+  for cat in categories:
+    catList.append(cat.id)
+
+  if id in catList:
+    return True
+  else:
+    return False
+
+
+# ------------------------------------------------------------------------------
 #  Given array of Question objects, return object, using index as key
 # ------------------------------------------------------------------------------
 def format_question_array(questions):
@@ -94,12 +118,9 @@ def get_questions_package(page, questions, cat):
     qresults = { 'questions': q_obj,
                  'total_questions': len(questions),
                  'categories': get_all_categories(),
-                 'currentCategory': cat,                # hardcoded
+                 'currentCategory': cat,                
                  'success': True }
-    # qresults['questions'] = q_obj
-    # qresults['total_questions'] = len(questions)
-    # qresults['categories'] = get_all_categories()
-    # qresults['success'] = True
+
 
     return jsonify(qresults)
 
@@ -174,7 +195,17 @@ def create_app(test_config=None):
   def get_questions_by_cat(id):
       page = request.args.get('page', 1, type=int)
 
-      questions = Question.query.filter_by(category=id).all()
+      error = False
+      if not is_valid_category(id):
+        abort(422)
+
+      try:
+        questions = Question.query.filter_by(category=id).all()
+      except:
+        error = True
+
+      if error:
+        abort(422)
 
       return get_questions_package(page, questions, id)
 
@@ -250,16 +281,6 @@ def create_app(test_config=None):
     return success_obj()
 
 
-  '''
-  @TODO: (done)
-  Create an endpoint to POST a new question, 
-  which will require the question and answer text, 
-  category, and difficulty score.
-
-  TEST: When you submit a question on the "Add" tab, 
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
-  '''
 # -------------------------------------------------------------------------------------------
 #  /questions/add (POST) accepts new question text, new answer text and difficulty 
 #  and category from the Add Question form in the user interface. If not all the 

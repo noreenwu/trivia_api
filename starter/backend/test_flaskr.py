@@ -43,6 +43,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['categories'])
 
+    def test_get_category_404(self):        
+        res = self.client().get('/category')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+
     # test getting a page of questions
     def test_get_paginated_questions(self):
         res = self.client().get('/questions?page=2')
@@ -62,6 +68,19 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource not found')
+
+
+    # test getting a page of questions by category
+    def test_get_paginated_questions_by_category(self):
+        res = self.client().get('/categories/1/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['categories'])
+        self.assertTrue(data['questions'])
+
 
 
     # test creation of a new question
@@ -128,9 +147,24 @@ class TriviaTestCase(unittest.TestCase):
 
 
 
-    # def test_delete_question(self):
-    #     res = self.client().delete('/questions/<int> id')
+    def test_delete_question(self):
+        res = self.client().delete('/questions/6')
+        data = json.loads(res.data)
 
+        question = Question.query.filter(Question.id == 6).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(question, None)
+
+
+    def test_delete_nonexistent_question(self):
+        res = self.client().delete('/questions/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Something wrong; cannot process')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
