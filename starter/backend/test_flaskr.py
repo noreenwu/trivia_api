@@ -81,6 +81,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
         self.assertTrue(data['questions'])
 
+    # test getting a page of questions by invalid category
+    def test_get_paginated_questions_by_invalid_category(self):
+        res = self.client().get('/categories/12/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
 
 
     # test creation of a new question
