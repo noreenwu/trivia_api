@@ -4,7 +4,7 @@ import '../stylesheets/App.css';
 import Question from './Question';
 import Search from './Search';
 import $ from 'jquery';
-import { timingSafeEqual } from 'crypto';
+// import { timingSafeEqual } from 'crypto';
 
 import { QUESTIONS_PER_PAGE, API_SERVER } from '../constants'
 
@@ -117,7 +117,6 @@ class QuestionView extends Component {
  
     $.ajax({
       url: `${API_SERVER}/categories/${id}/questions?page=${pg}`, 
-      // url: `${API_SERVER}/categories/${id}/questions`, 
 
       type: "GET",
       success: (result) => {
