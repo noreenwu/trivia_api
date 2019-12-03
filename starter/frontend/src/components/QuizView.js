@@ -113,7 +113,7 @@ class QuizView extends Component {
   renderPrePlay(){
       return (
           <div className="quiz-play-holder">
-              <div className="choose-header">Choose Category</div>
+              <h2 className="choose-header">Choose Category</h2>
               <div className="category-holder">
                   <div className="play-category" onClick={this.selectCategory}>ALL</div>
                   {Object.keys(this.state.categories).map(id => {
