@@ -143,7 +143,6 @@ class QuizView extends Component {
 
 
   checkMultiWordResponse = (guessArray, answerArray) => {
-    console.log("checking multiwordresponse: ", guessArray, answerArray)
     for (let g of guessArray) {
       if (g !== 'the') {
         if (! answerArray.includes(g)) {
@@ -163,8 +162,9 @@ class QuizView extends Component {
   }
 
   evaluateAnswer = () => {
+    // const formattedGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
 
-    const formattedGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
+    const formattedGuess = this.state.guess.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").toLowerCase()
     const formattedAnswer = this.state.currentQuestion.answer.toLowerCase()
     const answerArray = formattedAnswer.split(' ')
     const guessArray = formattedGuess.split(' ')
