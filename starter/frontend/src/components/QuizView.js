@@ -25,7 +25,7 @@ class QuizView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `${API_SERVER}/categories`, //TODO: update request URL
+      url: `${API_SERVER}/categories`, 
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -50,7 +50,7 @@ class QuizView extends Component {
     const previousQuestions = [...this.state.previousQuestions]
     if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
     if ((this.state.previousQuestions.length > 0) && (this.state.previousQuestions.length ===  this.state.numTotalQuestions-1)) {
-        console.log("no more questions, force end")
+        // no more questions, so end
         this.setState({
           forceEnd: true
         })
@@ -58,7 +58,7 @@ class QuizView extends Component {
     }
 
     $.ajax({
-      url: `${API_SERVER}/quizzes`, //TODO: update request URL
+      url: `${API_SERVER}/quizzes`, 
       type: "POST",
       dataType: 'json',
       contentType: 'application/json; charset=utf-8',
