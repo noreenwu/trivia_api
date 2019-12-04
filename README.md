@@ -215,6 +215,7 @@ GET /questions?page=<int:id>
 }
 
 GET /categories/<int:id>/questions
+
 GET /categories<int:id>/questions?page=<int:id>
 
     This endpoint is similar to the /questions endpoint, except that only questions of
