@@ -71,7 +71,7 @@ GET /questions?page=<int:id>
     without pagination.
 
     Not specifying a page number will result in page 1 being returned, with QUESTIONS_PER_PAGE
-    questions being shown on each full page. 
+    (set to 10) questions being shown on each full page. 
 
     Sample:
 
@@ -214,13 +214,47 @@ POST /questions/search
 
     Returns a list of questions that match the end user's search term or fragment, in
     the same format as the /questions and /categories/<id>/questions endpoints described above.
+    That is, included are the categories object, the currentCategory (null since no category
+    can be specified for search), the questions object of objects, a success value, and
+    the total questions matching the search term.
 
     The search term or pattern and the page number must be passed in as a json
-    object.
+    object. 
+
+    The maximum number of returned questions is the number of questions per page, (set to 10).
 
     Sample:
 
-
+    $ curl http://localhost:5000/questions/search -H "Content-Type: application/json" -d '{ "searchTerm": "title", "page": 1 }' -X POST
+    {
+    "categories": {
+        "1": "Science", 
+        "2": "Art", 
+        "3": "Geography", 
+        "4": "History", 
+        "5": "Entertainment", 
+        "6": "Sports"
+    }, 
+    "currentCategory": null, 
+    "questions": {
+        "1": {
+        "answer": "Maya Angelou", 
+        "category": 4, 
+        "difficulty": 2, 
+        "id": 5, 
+        "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        }, 
+        "2": {
+        "answer": "Edward Scissorhands", 
+        "category": 5, 
+        "difficulty": 3, 
+        "id": 6, 
+        "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+        }
+    }, 
+    "success": true, 
+    "total_questions": 2
+    }
 
 
 DELETE /questions/<int:id>
