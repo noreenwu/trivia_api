@@ -1,0 +1,7 @@
+.top-nav, .title-nav {
+    cursor: pointer;
+}
+
+.top-nav:hover {
+    color: dodgerblue;
+}

@@ -23,6 +23,7 @@
 
 .play-category {
     margin: 5px;
+    cursor: pointer;
 }
 
 .button {

@@ -78,7 +78,9 @@ span.page-num.active {
   font-size: .9em;
   cursor: pointer;  
 }
-
+.categories-title {
+  cursor: pointer;
+}
 img.category {
   margin: 0 8px 15px 0;
   cursor: pointer;  

@@ -191,7 +191,7 @@ class QuestionView extends Component {
     return (
       <div className="question-view">
         <div className="categories-list">
-          <h2 className="title" onClick={() => {this.getQuestions()}}>Categories</h2>
+          <h2 className={`title categories-title`} onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
             {Object.keys(this.state.categories).map((id, ) => (
               <li className="category-container" key={id} onClick={() => {this.getByCategory(id, 1)}}>
