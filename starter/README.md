@@ -35,7 +35,7 @@ The API may return 3 error types when requests fail:
    422: Not processable
 
 
-Resource endpoint library
+##Resource endpoint library
 
 GET /categories
 
@@ -259,12 +259,71 @@ POST /questions/search
 
 DELETE /questions/<int:id>
 
+    Deletes the question of the specified ID, if it exists. On successful deletion, a success value is returned.
+
+    If the specified question does not exist, error code 400 is returned.
+
+    Sample:
+    $ curl -X DELETE http://localhost:5000/questions/131
+    {
+    "deleted": 131, 
+    "success": true
+    }
+
+
 POST /questions/add
+
+    Creates a new question in the database. Required data includes the question text, the answer text,
+    a difficulty rating and a category. A success value is returned on successful creation of the new question.
+
+    Sample:
+    $ curl -X POST http://localhost:5000/questions/add -H "Content-Type: application/json" -d '{"question": "What is a baby goat called?", "answer": "kid", "difficulty": 1, "category": 1}'
+    {
+    "success": true
+    }
+
 
 POST /quizzes
 
 
+     Takes as input an array of previous questions that the user has already seen and a quiz category.
+     Returns a question object, success value, and the total number of questions in the specified category.
+     Does not return questions that are in the previous_questions array.
 
-Sample request
-Arguments including data types
-Response object including status codes and data types
+     Example input:
+
+       { 'previous_questions': [], 
+         'quiz_category': { 'type': 'Science', 'id': 1} }
+
+
+    Sample: 
+
+    $ curl -X POST http://localhost:5000/quizzes -H "Content-Type: application/json" -d '{ "previous_questions": [], "quiz_category": {"type": "Science", "id": 1 }}'
+    {
+    "question": {
+        "answer": "The Liver", 
+        "category": 1, 
+        "difficulty": 4, 
+        "id": 20, 
+        "question": "What is the heaviest organ in the human body?"
+    }, 
+    "success": true, 
+    "total_questions": 4
+    }
+
+    Sample with previous questions:
+
+    $ curl -X POST http://localhost:5000/quizzes -H "Content-Type: application/json" -d '{ "previous_questions": [10], "quiz_category": {"type": "Sports", "id": 6 }}'
+    {
+    "question": {
+        "answer": "Uruguay", 
+        "category": 6, 
+        "difficulty": 4, 
+        "id": 11, 
+        "question": "Which country won the first ever soccer World Cup in 1930?"
+    }, 
+    "success": true, 
+    "total_questions": 2
+    }
+
+
