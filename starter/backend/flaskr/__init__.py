@@ -271,7 +271,7 @@ def create_app(test_config=None):
 
     try:
       the_question.delete()
-      db.session.commit()
+      db.session.commit() 
     except:
       error = True
       app.logger.info("An error occurred while trying to delete a question.")
@@ -279,7 +279,9 @@ def create_app(test_config=None):
     if error:
       abort(422)      
 
-    return success_obj()
+    return jsonify({ 'success': True,
+                     'deleted': id})
+    # return success_obj()
 
 
 # -------------------------------------------------------------------------------------------
