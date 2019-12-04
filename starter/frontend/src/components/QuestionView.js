@@ -7,6 +7,7 @@ import $ from 'jquery';
 // import { timingSafeEqual } from 'crypto';
 
 import { QUESTIONS_PER_PAGE, API_SERVER } from '../constants'
+import { thisTypeAnnotation } from '@babel/types';
 
 
 class QuestionView extends Component {
@@ -28,6 +29,7 @@ class QuestionView extends Component {
   }
 
   saveCurrentFunction = (newFunc) => {
+    console.log("saving function ", newFunc)
     this.setState({
       currentFunction : newFunc
     })
@@ -85,7 +87,7 @@ class QuestionView extends Component {
   selectPage(num) {
     if (this.state.currentFunction === this.submitSearch ) {
       this.setState({ page: num }, 
-                      () => this.submitSearch(this.state.searchTerm));
+                      () => this.submitSearch(this.state.searchTerm, this.state.page));
     }
     else {
       if (this.state.currentCategory === null) {
@@ -113,8 +115,8 @@ class QuestionView extends Component {
 
   getByCategory= (id, pg) => {
     this.saveCurrentFunction(this.getByCategory)    
-    console.log("getByCategory")
- 
+
+
     $.ajax({
       url: `${API_SERVER}/categories/${id}/questions?page=${pg}`, 
 
@@ -133,7 +135,7 @@ class QuestionView extends Component {
     })
   }
 
-  submitSearch = (searchTerm) => {
+  submitSearch = (searchTerm, pg=1) => {
     this.saveCurrentFunction(this.submitSearch)
     this.saveSearchTerm(searchTerm)    
 
@@ -142,7 +144,7 @@ class QuestionView extends Component {
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm, page: this.state.page}),
+      data: JSON.stringify({searchTerm: searchTerm, page: pg}),
       // xhrFields: {
       //   withCredentials: true
       // },
@@ -170,8 +172,9 @@ class QuestionView extends Component {
           type: "DELETE",
           success: (result) => {
             this.adjustPageNumber() 
+       
             if (this.state.currentFunction === this.submitSearch ) {
-              this.state.currentFunction(this.state.searchTerm)
+              this.state.currentFunction(this.state.searchTerm, this.state.page)
             }
             else {
               this.state.currentFunction(this.state.currentCategory, this.state.page)
