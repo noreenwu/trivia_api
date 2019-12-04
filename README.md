@@ -24,7 +24,7 @@ Python 3.7, pip and node.
 ### Back-end
 
 Download the repository at https://github.com/noreenwu/trivia_api and cd into
-starter/backend. In this directory, run pip install requirements.txt, which 
+starter/backend. In this directory, run "pip install -r requirements.txt", which 
 will install the rest of the backend dependencies. To run the server, issue the
 following commands:
 
