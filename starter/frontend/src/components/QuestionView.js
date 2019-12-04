@@ -138,7 +138,11 @@ class QuestionView extends Component {
   submitSearch = (searchTerm, pg=1) => {
     this.saveCurrentFunction(this.submitSearch)
     this.saveSearchTerm(searchTerm)    
-
+    if (pg === 1) {
+      this.setState({
+        page: 1
+      })
+    }
     $.ajax({
       url: `${API_SERVER}/questions/search`, 
       type: "POST",
