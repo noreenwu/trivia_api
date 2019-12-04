@@ -108,6 +108,7 @@ GET /categories
     }
 
 GET /questions 
+
 GET /questions?page=<int:id>
 
     Note that all endpoints that return questions 
@@ -380,7 +381,7 @@ POST /quizzes
 
 ## Authors
 
-database schema, Flask skeleton code, React front-end: Udacity Full Stack ND Program
+Postgres database schema, Flask skeleton code, React front-end: Udacity Full Stack ND Program
 
 Trivia API endpoints, test cases and React front-end extensions: Noreen Wu
 
