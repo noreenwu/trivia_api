@@ -28,16 +28,23 @@
 
 .button {
     width: 100px;
-    margin-top: 5px;
+    margin-top: 15px;
     background-color: dodgerblue;
     color: white;
     padding: 3px 5px;
     align-self: center;
 }
 
+input[type="text"] {
+    text-align: center;    
+}
+.next-question {
+    width: 200px;
+}
 div.button {
-    margin-top: 20px;
-    margin-left: calc(50% - 50px);
+    /* margin-top: 20px; */
+    /* margin-left: calc(50% - 50px); */
+    margin: 15px auto;
 }
 
 .quiz-question {

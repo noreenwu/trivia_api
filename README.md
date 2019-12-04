@@ -6,7 +6,7 @@
 
 ## Introduction
 
-The Trivia application allows its users to maintain a cateegorized database of
+The Trivia application allows its users to maintain a categorized database of
 questions and answers as well as to run trivia quizzes. In addition to being viewable by
 category, questions are each marked with a difficulty level. Questions can be searched for 
 by keyword or by word fragment.

@@ -19,3 +19,9 @@ input[type="text"] {
 select {
   margin: 0 10px;
 }
+
+.button {
+  border-radius: 10px;
+  outline: none; 
+  border: none;
+}
