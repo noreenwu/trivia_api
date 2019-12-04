@@ -6,7 +6,7 @@ import random
 import logging
 from models import setup_db, Question, Category
 
-QUESTIONS_PER_PAGE = 6
+QUESTIONS_PER_PAGE = 10
 MOST_DIFFICULT_RATING = 5
 
 
@@ -183,7 +183,8 @@ def create_app(test_config=None):
          cat_obj[i] = c.type
          i = i+1
       app.logger.info(cat_obj)
-      categories = {'categories': cat_obj}
+      categories = {'categories': cat_obj,
+                    'success': True}
       return jsonify(categories)
 
 
@@ -398,7 +399,7 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 422,
-          "message": "Something wrong; cannot process"
+          "message": "Not processable"
       }), 422
 
 # ---------------------------------------------------------------------------

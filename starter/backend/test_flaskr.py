@@ -41,6 +41,7 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)        
         self.assertTrue(data['categories'])
 
     # test getting category with wrong endpoint
@@ -93,8 +94,9 @@ class TriviaTestCase(unittest.TestCase):
 
     # test searching for a question
     def test_search_question(self):
-        res = self.client().post('/questions/search', json={ 'searchTerm': 'Tom', 
-                                                             'page': 1})
+        res = self.client().post('/questions/search', 
+                                json={'searchTerm': 'Tom', 
+                                      'page': 1})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -128,7 +130,7 @@ class TriviaTestCase(unittest.TestCase):
                                                           'category': 1,
                                                           'difficulty': 1} )
         data = json.loads(res.data)
-        question = Question.query.filter_by(answer="calf").first()
+        question = Question.query.filter_by(question="test question?").filter_by(answer="test answer").first()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
