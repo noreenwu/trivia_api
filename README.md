@@ -21,8 +21,48 @@ run the Trivia application.
 It is assumed that the following technologies are already available on your platform:
 Python 3.7, pip and node.
 
-Checkout the repository at https://github.com/noreenwu/trivia_api and cd into
-starter/backend
+### Back-end
+
+Download the repository at https://github.com/noreenwu/trivia_api and cd into
+starter/backend. In this directory, run pip install requirements.txt, which 
+will install the rest of the backend dependencies. To run the server, issue the
+following commands:
+
+   export FLASK_APP=flaskr
+   export FLASK_ENV=development
+   flask run
+
+The server will run in development mode on port 5000. The source file being executed
+resides in the subdirectory flaskr and is called __init__.py. To verify that the server
+is running, go to http://127.0.0.1:5000/ or http://localhost:5000/ in your browser.
+
+
+### Front-end
+
+From the front-end folder (starter/frontend), use npm to install the dependencies:
+
+   npm install
+
+Then start the frontend service with:
+
+   npm start
+
+
+The front-end can be accessed from your browser by going to http://localhost:3000.
+
+
+### Tests
+
+In order to run tests, navigate to the starter/backend folder and create the
+test database, which will parallel the database used by the front-end application.
+
+    createdb trivia_test
+    psql trivia_test < trivia.psql
+    python test_flaskr.py
+
+If the Trivia application is extended, accompanying tests should also be kept
+updated in the test_flaskr.py file.
+
 
 ## API Reference: Getting Started
 
@@ -336,5 +376,17 @@ POST /quizzes
     "success": true, 
     "total_questions": 2
     }
+
+
+## Authors
+
+database schema, Flask skeleton code, React front-end: Udacity Full Stack ND Program
+
+Trivia API endpoints, test cases and React front-end extensions: Noreen Wu
+
+## Acknowledgements
+
+I would like to thank my kids for adding difficult trivia questions to the application, for
+pointing out that the cursor should be a pointer, and for generally being interested in the project.
 
 
