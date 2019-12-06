@@ -152,31 +152,28 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
     db = SQLAlchemy(app)
-
     cors = CORS(app, resources={r"/*": {"origins": "*"}})
-
 
     @app.after_request
     def after_request(response):
-        # response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PATCH,POST,DELETE,OPTIONS')
         return response
 
-#------------------------------------------------------------------------------------------
-#  The endpoint /categories (GET) returns an object of all available categories.
-#------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+#  Endpoint /categories (GET) returns an object of all available categories.
+# ------------------------------------------------------------------------------
     @app.route('/categories')
     def get_categories():
 
         error = False
         try:
-          categories = Category.query.all()
-        except:
-          error = True
-
+            categories = Category.query.all()
+        except DatabaseError:
+            error = True
 
         if error:
-          abort(422)  
+            abort(422)
 
         i = 1
         cat_obj = {}
@@ -189,32 +186,33 @@ def create_app(test_config=None):
         return jsonify(categories)
 
 
-# -------------------------------------------------------------------------------------------
-#  /categories/<int:id>/questions (GET) returns the questions that will appear 
+# ------------------------------------------------------------------------------
+#  /categories/<int:id>/questions (GET) returns the questions that will appear
 #  on the specified page. There are 10 pages per question (const defined above)
-# -------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     @app.route('/categories/<int:id>/questions')
     def get_questions_by_cat(id):
         page = request.args.get('page', 1, type=int)
 
         error = False
         if not is_valid_category(id):
-          abort(404)
+            abort(404)
 
         try:
-          questions = Question.query.filter_by(category=id).all()
-        except:
-          error = True
+            questions = Question.query.filter_by(category=id).all()
+        except DatabaseError:
+            error = True
 
         if error:
-          abort(404)
+            abort(404)
 
         return get_questions_package(page, questions, id)
 
 
-# -------------------------------------------------------------------------------------------
-#  /questions (GET) returns questions from all categories that will appear on the specified page
-# -------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+#  /questions (GET) returns questions from all categories that will appear on
+#  the specified page
+# ------------------------------------------------------------------------------
     @app.route('/questions')
     def get_questions():
         page = request.args.get('page', 1, type=int)
@@ -223,22 +221,21 @@ def create_app(test_config=None):
 
         return get_questions_package(page, questions, None)
 
-
-# -------------------------------------------------------------------------------------------
-#  /questions/search (POST) returns questions that include the user-provided search term. 
-#  Both the search term and the question are lowercased to ignore case.
-# -------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+#  /questions/search (POST) returns questions that include the user-provided
+#  search term. Both the search term and the question are lowercased to
+#  ignore case.
+# ------------------------------------------------------------------------------
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
 
-
-        if not request.json or not 'searchTerm' in request.json:
+        if not request.json or 'searchTerm' not in request.json:
             abort(400)
 
-        if not 'page' in request.json:
-          page = 1
+        if 'page' not in request.json:
+            page = 1
         else:
-          page = request.get_json()['page']
+            page = request.get_json()['page']
 
         term = request.get_json()['searchTerm']
 
@@ -246,81 +243,81 @@ def create_app(test_config=None):
 
         error = False
         try:
-          questions = Question.query.filter(Question.question.ilike(search_term)).all()
-        except:
-          error = True
-          app.logger.info("error occurred on search, aborting...")
+            questions = (
+                          Question.query
+                          .filter(Question.question.ilike(search_term)).all()
+            )
+        except DatabaseError:
+            error = True
+            app.logger.info("An error occurred while attempting to search.")
 
         if error:
             abort(422)
-        
-        
-        return get_questions_package(page, questions, None)
-    
 
-# -------------------------------------------------------------------------------------------
-#  /questions/<int:id> (DELETE) retrieves the question specified by id in the url and
-#  deletes it from the database
-# -------------------------------------------------------------------------------------------
+        return get_questions_package(page, questions, None)
+
+# ------------------------------------------------------------------------------
+#  /questions/<int:id> (DELETE) retrieves the question specified by id in the
+#  url and deletes it from the database
+# ------------------------------------------------------------------------------
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
 
-      error = False
-      the_question = Question.query.filter_by(id=id).one_or_none()
-      if the_question is None:
-        abort(400)
+        error = False
+        the_question = Question.query.filter_by(id=id).one_or_none()
+        if the_question is None:
+            abort(400)
 
-      try:
-        the_question.delete()
-        db.session.commit() 
-      except:
-        error = True
-        app.logger.info("An error occurred while trying to delete a question.")
+        try:
+            the_question.delete()
+            db.session.commit()
+        except DatabaseError:
+            error = True
+            app.logger.info("An error occurred while deleting a question.")
 
-      if error:
-        abort(422)      
+        if error:
+            abort(422)
 
-      return jsonify({ 'success': True,
+        return jsonify({'success': True,
                         'deleted': id})
-      # return success_obj()
 
-
-# -------------------------------------------------------------------------------------------
-#  /questions/add (POST) accepts new question text, new answer text and difficulty 
-#  and category from the Add Question form in the user interface. If not all the 
-#  data is provided, then an error type 400 is returned, otherwise the new question is added
-# -------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+#  /questions/add (POST) accepts new question text, answer text and difficulty
+#  and category from the Add Question form in the user interface. If not all
+#  required data is provided, error type 400 is returned, otherwise the new
+#  question is added
+# -------------------------------------------------------------------------------
     @app.route('/questions/add', methods=['POST'])
     def add_new_questions():
 
-      question_text = request.get_json()['question']
-      answer_text = request.get_json()['answer']
-      difficulty_rating = int(request.get_json()['difficulty'])
-      category_setting = int(request.get_json()['category'])
+        question_text = request.get_json()['question']
+        answer_text = request.get_json()['answer']
+        difficulty_rating = int(request.get_json()['difficulty'])
+        category_setting = int(request.get_json()['category'])
 
-      have_all_data = False
-      if question_text.strip() and answer_text.strip() and is_valid_difficulty(difficulty_rating) and is_valid_category(category_setting):
-        have_all_data = True
+        have_all_data = False
+        if question_text.strip() and answer_text.strip() and is_valid_difficulty(difficulty_rating) and is_valid_category(category_setting):
+          have_all_data = True
 
 
-      if not request.json or not have_all_data:
-          abort(400)    
+        if not request.json or not have_all_data:
+            abort(400)    
 
-      error = False
-      try:
-        # insert new question into db
-        new_question = Question(question=question_text,answer=answer_text,
-                                difficulty=difficulty_rating,category=category_setting)
+        error = False
+        try:
+          # insert new question into db
+          new_question = Question(question=question_text,answer=answer_text,
+                                  difficulty=difficulty_rating,category=category_setting)
 
-        db.session.add(new_question)                              
-        db.session.commit()
-        return success_obj()
-      except:
-        error = True
-        app.logger.info("error occurred in adding a new question, aborting...")
+          db.session.add(new_question)                              
+          db.session.commit()
+          return success_obj()
+        except:
+          error = True
+          app.logger.info("error occurred in adding a new question, aborting...")
 
-      if error:
-          abort(422)
+        if error:
+            abort(422)
 
 
 # -------------------------------------------------------------------------------------------
