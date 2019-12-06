@@ -296,87 +296,105 @@ def create_app(test_config=None):
         category_setting = int(request.get_json()['category'])
 
         have_all_data = False
-        if question_text.strip() and answer_text.strip() and is_valid_difficulty(difficulty_rating) and is_valid_category(category_setting):
-          have_all_data = True
-
+        if (question_text.strip() and
+                answer_text.strip() and
+                is_valid_difficulty(difficulty_rating) and
+                is_valid_category(category_setting)):
+            have_all_data = True
 
         if not request.json or not have_all_data:
-            abort(400)    
+            abort(400)
 
         error = False
         try:
-          # insert new question into db
-          new_question = Question(question=question_text,answer=answer_text,
-                                  difficulty=difficulty_rating,category=category_setting)
+            # insert new question into db
+            new_question = Question(question=question_text,
+                                    answer=answer_text,
+                                    difficulty=difficulty_rating,
+                                    category=category_setting)
 
-          db.session.add(new_question)                              
-          db.session.commit()
-          return success_obj()
-        except:
-          error = True
-          app.logger.info("error occurred in adding a new question, aborting...")
+            db.session.add(new_question)
+            db.session.commit()
+            return success_obj()
+        except DatabaseError:
+            error = True
+            app.logger.info("Error occurred in adding a new question")
 
         if error:
             abort(422)
 
 
-# -------------------------------------------------------------------------------------------
-#  /quizzes (POST) returns a random question from the specified category (or from the
-#  general pool of questions if ALL is specified). Questions that have already been
-#  posed this session are omitted; they are passed in as previous_questions from the front-end
-# -------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+#  /quizzes (POST) returns a random question from the specified category
+#  (or from the general pool of questions if ALL is specified).
+#  Questions that have already been posed this session are omitted; they
+#  are passed in as previous_questions from the front-end
+# ---------------------------------------------------------------------------
     @app.route('/quizzes', methods=['POST'])
     def get_quiz_question():
-      # given category and list of previous question ids, return a random remaining question from the category
 
-      if not request.json or not 'previous_questions' in request.json or not 'quiz_category' in request.json:
-          abort(400)  
+        if (not request.json or
+                'previous_questions' not in request.json or
+                'quiz_category' not in request.json):
+            abort(400)
 
-      quiz_cat = request.json['quiz_category']
-      quiz_category_id = quiz_cat['id']
+        quiz_cat = request.json['quiz_category']
+        quiz_category_id = quiz_cat['id']
 
-      previous_questions = request.get_json()['previous_questions']
+        previous_questions = request.get_json()['previous_questions']
 
-      if previous_questions is None:
-        previous_questions = []
+        if previous_questions is None:
+            previous_questions = []
 
-      error = False
-      try:
-          if quiz_category_id == 0:  # if user selects All categories
-            questions = Question.query.filter(~Question.id.in_(previous_questions)).all()
-            tot_questions = len(Question.query.all())
-          else:  
-            questions = Question.query.filter(Question.category==quiz_category_id).filter(~Question.id.in_(previous_questions)).all()
-            tot_questions = len(Question.query.filter(Question.category==quiz_category_id).all())
+        error = False
+        try:
+            if quiz_category_id == 0:  # if user selects All categories
+                questions = (
+                      Question.query
+                      .filter(~Question.id.in_(previous_questions)).all()
+                )
+                tot_questions = len(Question.query.all())
+            else:
+                questions = (
+                      Question.query
+                      .filter(Question.category == quiz_category_id)
+                      .filter(~Question.id.in_(previous_questions)).all()
+                )
+                tot_questions = (len(
+                          Question.query
+                          .filter(Question.category == quiz_category_id)
+                          .all())
+                )
 
-      except:
-          error = True
-          app.logger.info("error occurred on querying for quiz data, aborting...")
+        except DatabaseError:
+            error = True
+            app.logger.info("An error occurred on querying for quiz data.")
 
-      if error:
-          abort(422)
-      else:
-          result = {}
-          if len(questions) == 0:
-              result['question'] = jsonify({'id': 0,
-                                            'question': '',
-                                            'answer': '',
-                                            'difficulty': -1,
-                                            'category': 0})
-              return jsonify(result)
+        if error:
+            abort(422)
+        else:
+            result = {}
+            if len(questions) == 0:
+                result['question'] = jsonify({'id': 0,
+                                              'question': '',
+                                              'answer': '',
+                                              'difficulty': -1,
+                                              'category': 0})
+                return jsonify(result)
 
-          result['total_questions'] = tot_questions
+            result['total_questions'] = tot_questions
 
-          # if more than one question to choose from, randomly select from the batch
-          if len(questions) > 1:
-              rand_idx = random.randint(0, len(questions)-1)
-              result['question'] = format_question(questions[rand_idx])
-              result['success'] = True
-              return jsonify(result)
-          else:
-              result['question'] = format_question(questions[0])
-              result['success'] = True            
-              return jsonify(result)
+            # if more than one question to choose from,
+            # then randomly select from the batch
+            if len(questions) > 1:
+                rand_idx = random.randint(0, len(questions)-1)
+                result['question'] = format_question(questions[rand_idx])
+                result['success'] = True
+                return jsonify(result)
+            else:
+                result['question'] = format_question(questions[0])
+                result['success'] = True
+                return jsonify(result)
 
 # ---------------------------------------------------------------------------
 #  If user specifies a page beyond which there are questions, return a 404
@@ -404,7 +422,8 @@ def create_app(test_config=None):
 
 # ---------------------------------------------------------------------------
 # This is an error caused by improper use of an endpoint, or insufficient
-# or incorrect input values, such as an blank question text when creating a question
+# or incorrect input values, such as sending a blank question text when
+# creating a question
 # ---------------------------------------------------------------------------
     @app.errorhandler(400)
     def cannot_process(error):
@@ -415,4 +434,3 @@ def create_app(test_config=None):
         }), 400
 
     return app
-
