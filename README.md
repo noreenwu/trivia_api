@@ -28,9 +28,9 @@ starter/backend. In this directory, run "pip install -r requirements.txt", which
 will install the rest of the backend dependencies. To run the server, issue the
 following commands:
 
-   export FLASK_APP=flaskr
-   export FLASK_ENV=development
-   flask run
+    export FLASK_APP=flaskr
+    export FLASK_ENV=development
+    flask run
 
 The server will run in development mode on port 5000. The source file being executed
 resides in the subdirectory flaskr and is called __init__.py. To verify that the server
@@ -86,7 +86,7 @@ The API may return 3 error types when requests fail:
    422: Not processable
 
 
-##Resource endpoint library
+## Resource endpoint library
 
 GET /categories
 
