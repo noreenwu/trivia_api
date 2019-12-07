@@ -171,7 +171,7 @@ def create_app(test_config=None):
         for c in categories:
             cat_obj[i] = c.type
             i = i+1
-        app.logger.info(cat_obj)
+
         categories = {'categories': cat_obj,
                       'success': True}
         return jsonify(categories)
