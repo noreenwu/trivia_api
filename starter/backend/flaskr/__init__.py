@@ -5,6 +5,9 @@ from flask_cors import CORS
 import random
 import logging
 from models import setup_db, Question, Category
+from sqlalchemy.exc import DatabaseError
+
+# db = SQLAlchemy()
 
 QUESTIONS_PER_PAGE = 10
 MOST_DIFFICULT_RATING = 5
@@ -18,15 +21,11 @@ MOST_DIFFICULT_RATING = 5
 # ----------------------------------------------------------------------------
 def get_all_categories():
 
-    error = False
     try:
         categories = Category.query.all()
     except DatabaseError:
-        print("Could not get cateegories from the database")
-        error = True
-
-    if error:
         abort(422)
+        print("Could not get categories from the database")
 
     i = 1
     cat_obj = {}
@@ -42,13 +41,9 @@ def get_all_categories():
 # ------------------------------------------------------------------------------
 def is_valid_category(id):
 
-    error = False
     try:
         categories = Category.query.all()
     except DatabaseError:
-        error = True
-
-    if error:
         abort(422)
 
     catList = []
@@ -166,13 +161,9 @@ def create_app(test_config=None):
     @app.route('/categories')
     def get_categories():
 
-        error = False
         try:
             categories = Category.query.all()
         except DatabaseError:
-            error = True
-
-        if error:
             abort(422)
 
         i = 1
@@ -194,16 +185,12 @@ def create_app(test_config=None):
     def get_questions_by_cat(id):
         page = request.args.get('page', 1, type=int)
 
-        error = False
         if not is_valid_category(id):
             abort(404)
 
         try:
             questions = Question.query.filter_by(category=id).all()
         except DatabaseError:
-            error = True
-
-        if error:
             abort(404)
 
         return get_questions_package(page, questions, id)
@@ -241,17 +228,13 @@ def create_app(test_config=None):
 
         search_term = get_term(term)
 
-        error = False
         try:
             questions = (
                           Question.query
                           .filter(Question.question.ilike(search_term)).all()
             )
         except DatabaseError:
-            error = True
             app.logger.info("An error occurred while attempting to search.")
-
-        if error:
             abort(422)
 
         return get_questions_package(page, questions, None)
@@ -263,7 +246,6 @@ def create_app(test_config=None):
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
 
-        error = False
         the_question = Question.query.filter_by(id=id).one_or_none()
         if the_question is None:
             abort(400)
@@ -272,10 +254,7 @@ def create_app(test_config=None):
             the_question.delete()
             db.session.commit()
         except DatabaseError:
-            error = True
-            app.logger.info("An error occurred while deleting a question.")
-
-        if error:
+            app.logger.info("An error occurred in trying to delete question.")
             abort(422)
 
         return jsonify({'success': True,
@@ -305,7 +284,6 @@ def create_app(test_config=None):
         if not request.json or not have_all_data:
             abort(400)
 
-        error = False
         try:
             # insert new question into db
             new_question = Question(question=question_text,
@@ -313,14 +291,10 @@ def create_app(test_config=None):
                                     difficulty=difficulty_rating,
                                     category=category_setting)
 
-            db.session.add(new_question)
-            db.session.commit()
+            new_question.insert()
             return success_obj()
         except DatabaseError:
-            error = True
             app.logger.info("Error occurred in adding a new question")
-
-        if error:
             abort(422)
 
 
@@ -346,7 +320,6 @@ def create_app(test_config=None):
         if previous_questions is None:
             previous_questions = []
 
-        error = False
         try:
             if quiz_category_id == 0:  # if user selects All categories
                 questions = (
@@ -367,34 +340,31 @@ def create_app(test_config=None):
                 )
 
         except DatabaseError:
-            error = True
             app.logger.info("An error occurred on querying for quiz data.")
-
-        if error:
             abort(422)
+
+        result = {}
+        if len(questions) == 0:
+            result['question'] = jsonify({'id': 0,
+                                          'question': '',
+                                          'answer': '',
+                                          'difficulty': -1,
+                                          'category': 0})
+            return jsonify(result)
+
+        result['total_questions'] = tot_questions
+
+        # if more than one question to choose from,
+        # then randomly select from the batch
+        if len(questions) > 1:
+            rand_idx = random.randint(0, len(questions)-1)
+            result['question'] = format_question(questions[rand_idx])
+            result['success'] = True
+            return jsonify(result)
         else:
-            result = {}
-            if len(questions) == 0:
-                result['question'] = jsonify({'id': 0,
-                                              'question': '',
-                                              'answer': '',
-                                              'difficulty': -1,
-                                              'category': 0})
-                return jsonify(result)
-
-            result['total_questions'] = tot_questions
-
-            # if more than one question to choose from,
-            # then randomly select from the batch
-            if len(questions) > 1:
-                rand_idx = random.randint(0, len(questions)-1)
-                result['question'] = format_question(questions[rand_idx])
-                result['success'] = True
-                return jsonify(result)
-            else:
-                result['question'] = format_question(questions[0])
-                result['success'] = True
-                return jsonify(result)
+            result['question'] = format_question(questions[0])
+            result['success'] = True
+            return jsonify(result)
 
 # ---------------------------------------------------------------------------
 #  If user specifies a page beyond which there are questions, return a 404
