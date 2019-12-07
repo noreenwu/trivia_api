@@ -21,10 +21,19 @@ run the Trivia application.
 It is assumed that the following technologies are already available on your platform:
 Python 3.7, pip and node.
 
+Download the repository at https://github.com/noreenwu/trivia_api and cd into
+starter/backend.
+
+### Database
+
+Create the Postgres database "trivia," and populate it with the schema and initial data.
+
+     createdb trivia
+     psql trivia < trivia.psql
+
 ### Back-end
 
-Download the repository at https://github.com/noreenwu/trivia_api and cd into
-starter/backend. In this directory, run "pip install -r requirements.txt", which 
+From starter/backend, run "pip install -r requirements.txt", which 
 will install the rest of the backend dependencies. To run the server, issue the
 following commands:
 
