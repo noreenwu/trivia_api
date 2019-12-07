@@ -200,10 +200,10 @@ class TriviaTestCase(unittest.TestCase):
 
     # test deletion of a question that exists
     def test_delete_question(self):
-        res = self.client().delete('/questions/5')
+        res = self.client().delete('/questions/9')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 5).one_or_none()
+        question = Question.query.filter(Question.id == 9).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
