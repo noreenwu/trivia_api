@@ -16,7 +16,8 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = "trivia_test"
         self.database_path = (
-            "postgres://{}/{}".format('localhost:5432', self.database_name)
+            "postgres://{}/{}"
+            .format('localhost:5432', self.database_name)
         )
         setup_db(self.app, self.database_path)
 
@@ -100,8 +101,11 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['questions'])
 
     # test searching for a question with no results and no specified page
-        res = self.client().post('/questions/search',
-                                 json={'searchTerm': 'zoology'})
+        res = (
+            self.client()
+            .post('/questions/search',
+                  json={'searchTerm': 'zoology'})
+        )
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -116,16 +120,20 @@ class TriviaTestCase(unittest.TestCase):
 
     # test creation of a new question
     def test_create_question(self):
-        res = self.client().post('/questions/add',
-                                 json={'question': 'test question?',
-                                       'answer': 'test answer',
-                                       'category': 1,
-                                       'difficulty': 1})
+        res = (
+            self.client()
+                .post('/questions/add',
+                      json={'question': 'test question?',
+                            'answer': 'test answer',
+                            'category': 1,
+                            'difficulty': 1})
+        )
         data = json.loads(res.data)
         question = (
             Question.query
-            .filter_by(question="test question?")
-            .filter_by(answer="test answer").first()
+                    .filter_by(question="test question?")
+                    .filter_by(answer="test answer")
+                    .first()
         )
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -144,11 +152,14 @@ class TriviaTestCase(unittest.TestCase):
 
     # test blank answer returns 400
     def test_incomplete_create_question2(self):
-        res = self.client().post('/questions/add',
-                                 json={'question': 'question with no answer',
-                                       'answer': '',
-                                       'category': 1,
-                                       'difficulty': 1})
+        res = (
+            self.client()
+                .post('/questions/add',
+                      json={'question': 'question with no answer',
+                            'answer': '',
+                            'category': 1,
+                            'difficulty': 1})
+        )
 
         data = json.loads(res.data)
 
@@ -158,11 +169,12 @@ class TriviaTestCase(unittest.TestCase):
     # test bad category returns 400
     def test_incorrect_create_question(self):
         res = (
-            self.client().post('/questions/add',
-                               json={'question': 'question with no category',
-                                     'answer': 'answer but no category',
-                                     'category': -1,
-                                     'difficulty': 1})
+            self.client()
+                .post('/questions/add',
+                      json={'question': 'question with no category',
+                            'answer': 'answer but no category',
+                            'category': -1,
+                            'difficulty': 1})
         )
 
         data = json.loads(res.data)
@@ -188,10 +200,10 @@ class TriviaTestCase(unittest.TestCase):
 
     # test deletion of a question that exists
     def test_delete_question(self):
-        res = self.client().delete('/questions/9')
+        res = self.client().delete('/questions/5')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 9).one_or_none()
+        question = Question.query.filter(Question.id == 5).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -237,6 +249,7 @@ class TriviaTestCase(unittest.TestCase):
     # test getting a quiz, no quiz category
     def test_get_quiz(self):
         res = self.client().post('/quizzes', json={'previous_questions': []})
+
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 400)
